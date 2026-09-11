@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>校园足球赛事数据 · 机器学习预测实验报告</title>
+<style>
+:root {
+  --navy: #0F2B46;
+  --navy-light: #1A3A5C;
+  --teal: #1B5E4F;
+  --teal-light: #2D6A4F;
+  --amber: #C8963E;
+  --amber-bg: #FDF6E9;
+  --amber-border: #E8D5A8;
+  --bg: #F4F5F7;
+  --card: #FFFFFF;
+  --text: #1A1F2E;
+  --text-secondary: #555F73;
+  --text-muted: #8B95A8;
+  --border: #E1E5EB;
+  --border-light: #EEF0F4;
+  --green: #2D6A4F;
+  --green-bg: #EDF5F0;
+  --orange: #C87533;
+  --orange-bg: #FBF0E6;
+  --blue: #2C5F8A;
+  --blue-bg: #EAF0F6;
+  --gray: #8B95A8;
+  --gray-bg: #F0F1F4;
+  --red: #B5453A;
+  --red-bg: #FAEDEA;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 1080px; margin: 0 auto; padding: 0 24px 60px; }
+
+/* ===== Header ===== */
+.report-header {
+  background: var(--navy);
+  color: #fff;
+  padding: 48px 0 40px;
+  margin-bottom: 32px;
+}
+.report-header .container { padding-bottom: 0; }
+.report-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.report-header .subtitle {
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 24px;
+}
+.header-stats {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.header-stat { text-align: left; }
+.header-stat .num {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--amber);
+}
+.header-stat .label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 2px;
+}
+.header-badge {
+  display: inline-block;
+  background: rgba(200,150,62,0.15);
+  color: var(--amber);
+  border: 1px solid rgba(200,150,62,0.35);
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  letter-spacing: 0.5px;
+}
+
+/* ===== Section ===== */
+.section { margin-bottom: 40px; }
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--navy);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.section-title .num {
+  font-size: 14px;
+  color: var(--amber);
+  font-weight: 600;
+}
+.subsection-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy-light);
+  margin: 24px 0 12px;
+  padding-left: 10px;
+  border-left: 3px solid var(--teal);
+}
+
+/* ===== Card ===== */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: none;
+}
+
+/* ===== KV Overview A/B split ===== */
+.kv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.kv-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+}
+.kv-card .kv-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+.kv-ab {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  flex: 1;
+}
+.kv-a, .kv-b {
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+.kv-a { background: var(--blue-bg); margin-right: 4px; }
+.kv-b { background: var(--green-bg); }
+.kv-plan-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.kv-a .kv-plan-tag { color: var(--blue); }
+.kv-b .kv-plan-tag { color: var(--teal); }
+.kv-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.kv-a .kv-value { color: var(--blue); }
+.kv-b .kv-value { color: var(--teal); }
+.kv-ci {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.kv-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-light);
+  line-height: 1.5;
+}
+/* single-value kv card (no A/B split) */
+.kv-single { text-align: center; padding: 14px 0; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.kv-single .kv-value { font-size: 26px; color: var(--amber); }
+.kv-single .kv-ci { font-size: 12px; margin-top: 6px; }
+.kv-single .kv-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--red);
+  background: var(--red-bg);
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-top: 8px;
+  letter-spacing: 0.5px;
+}
+
+/* ===== Method steps ===== */
+.method-steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+.method-step {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 14px 14px;
+  position: relative;
+}
+.method-step .step-num {
+  position: absolute;
+  top: -10px;
+  left: 14px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.method-step .step-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 8px 0 6px;
+}
+.method-step .step-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+.method-note {
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-border);
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #7A5A1E;
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+/* ===== Table ===== */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 12px 0;
+}
+.data-table th {
+  background: var(--navy);
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 12px;
+}
+.data-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+}
+.data-table tr:nth-child(even) td { background: #FAFBFC; }
+.data-table .num-col { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table .highlight-row td { background: var(--green-bg); font-weight: 600; }
+.data-table .baseline-row td { color: var(--text-muted); font-style: italic; }
+
+/* ===== Confusion matrix ===== */
+.confusion-grid {
+  display: inline-grid;
+  grid-template-columns: auto auto auto auto;
+  gap: 0;
+  margin: 12px 0;
+  font-size: 13px;
+}
+.cm-cell {
+  padding: 10px 16px;
+  text-align: center;
+  border: 1px solid var(--border);
+  min-width: 60px;
+}
+.cm-header { background: var(--navy); color: #fff; font-weight: 600; }
+.cm-row-header { background: var(--gray-bg); font-weight: 600; color: var(--text-secondary); }
+.cm-correct { background: var(--green-bg); font-weight: 700; color: var(--green); }
+.cm-wrong { background: var(--red-bg); color: var(--red); }
+.cm-zero { color: var(--text-muted); }
+
+/* ===== Stat inline ===== */
+.stat-inline {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.stat-inline .big {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.stat-inline .unit { font-size: 12px; color: var(--text-muted); }
+
+/* ===== Warning card ===== */
+.warning-card {
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-border);
+  border-left: 4px solid var(--amber);
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+.warning-card .warning-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #7A5A1E;
+  margin-bottom: 8px;
+}
+.warning-card p {
+  font-size: 13px;
+  color: #6B4F1A;
+  line-height: 1.65;
+}
+
+/* ===== Chart container ===== */
+.chart-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin: 16px 0;
+}
+.chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.chart-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.chart-container { width: 100%; height: 420px; }
+.chart-container-tall { width: 100%; height: 480px; }
+.chart-caption {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-light);
+  line-height: 1.6;
+}
+
+/* ===== Calibration cards ===== */
+.calib-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+.calib-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+.calib-card .calib-name { font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px; }
+.calib-card .calib-value { font-size: 28px; font-weight: 700; color: var(--navy); }
+.calib-card .calib-desc { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+/* ===== Two column layout for A/B tables ===== */
+.ab-tables {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0;
+}
+.ab-table-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+}
+.ab-table-card .ab-table-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid;
+}
+.ab-table-card.plan-a .ab-table-title { color: var(--blue); border-color: var(--blue); }
+.ab-table-card.plan-b .ab-table-title { color: var(--teal); border-color: var(--teal); }
+
+/* ===== Score distribution bars ===== */
+.score-dist { margin: 12px 0; }
+.score-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.score-label { width: 120px; color: var(--text-secondary); text-align: right; padding-right: 10px; flex-shrink: 0; }
+.score-bar-wrap { flex: 1; height: 20px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+.score-bar { height: 100%; background: var(--teal); border-radius: 3px; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; color: #fff; font-size: 11px; font-weight: 600; min-width: 30px; }
+.score-pct { width: 45px; text-align: left; padding-left: 8px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+/* ===== Conclusion list ===== */
+.conclusion-list { list-style: none; counter-reset: concl; }
+.conclusion-list li {
+  counter-increment: concl;
+  padding: 14px 16px 14px 48px;
+  margin-bottom: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.conclusion-list li::before {
+  content: counter(concl);
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  width: 24px;
+  height: 24px;
+  background: var(--navy);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== Appendix ===== */
+.appendix {
+  background: var(--gray-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+.appendix strong { color: var(--navy); }
+
+/* ===== Text helpers ===== */
+.text-muted { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
+.text-small { font-size: 12px; }
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.fw-600 { font-weight: 600; }
+.tag-green { display: inline-block; background: var(--green-bg); color: var(--green); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 3px; }
+.tag-orange { display: inline-block; background: var(--orange-bg); color: var(--orange); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 3px; }
+.tag-blue { display: inline-block; background: var(--blue-bg); color: var(--blue); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 3px; }
+.tag-gray { display: inline-block; background: var(--gray-bg); color: var(--gray); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 3px; }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .kv-grid { grid-template-columns: 1fr; }
+  .method-steps { grid-template-columns: 1fr; }
+  .ab-tables { grid-template-columns: 1fr; }
+  .calib-grid { grid-template-columns: 1fr; }
+  .kv-ab { grid-template-columns: 1fr; }
+  .kv-a { margin-right: 0; margin-bottom: 6px; }
+  .report-header h1 { font-size: 22px; }
+  .header-stats { gap: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="report-header">
+  <div class="container">
+    <span class="header-badge">统计严谨性修订版</span>
+    <h1>校园足球赛事数据 · 机器学习预测实验报告</h1>
+    <p class="subtitle">数据来源：西南大学校园足球联赛/院系杯战报 5 份（22/23/24/25/26 赛事纪录.docx），共 427 场比赛 · 已结构化到 Excel：赛事纪录汇总.xlsx</p>
+    <div class="header-stats">
+      <div class="header-stat"><div class="num">427 场</div><div class="label">总比赛样本</div></div>
+      <div class="header-stat"><div class="num">2022–2026</div><div class="label">时间跨度</div></div>
+      <div class="header-stat"><div class="num">45 支</div><div class="label">参赛队伍</div></div>
+      <div class="header-stat"><div class="num">24 列</div><div class="label">结构化字段</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ===== KV OVERVIEW (A/B split) ===== -->
+<div style="font-size:13px;color:#6B7280;margin-bottom:12px;line-height:1.7;">
+  <strong style="color:#1A1B1C;">关于 95% CI（置信区间）：</strong>由于测试样本只有 62–68 场，单点准确率有运气成分。CI 表示"如果重复实验 100 次，约 95 次的真实准确率会落在这个区间内"——区间越宽，说明样本越少、结论越不确定。两个方法的 CI 若大面积重叠，则差异不显著。
+</div>
+<div class="kv-grid">
+
+  <!-- Card 1: Direction prediction best -->
+  <div class="kv-card">
+    <div class="kv-label">方向预测最佳准确率（胜/不胜）</div>
+    <div class="kv-ab">
+      <div class="kv-a">
+        <div class="kv-plan-tag">方案A · 2022–25外推 (n=62)</div>
+        <div class="kv-value">80.6%</div>
+        <div class="kv-ci">95% CI [69.1–88.5]</div>
+      </div>
+      <div class="kv-b">
+        <div class="kv-plan-tag">方案B · 时间滚动 (n=68)</div>
+        <div class="kv-value">82.4%</div>
+        <div class="kv-ci">95% CI [71.7–89.6]</div>
+      </div>
+    </div>
+    <div class="kv-note">LR二分类"胜/不胜"。两种验证方案一致表明方向预测有效，比基线高约38个百分点。</div>
+  </div>
+
+  <!-- Card 2: 3-class best -->
+  <div class="kv-card">
+    <div class="kv-label">三分类胜平负最佳（规则押胜率）</div>
+    <div class="kv-ab">
+      <div class="kv-a">
+        <div class="kv-plan-tag">方案A · 2022–25外推 (n=62)</div>
+        <div class="kv-value">77.4%</div>
+        <div class="kv-ci">95% CI [65.6–86.0]</div>
+      </div>
+      <div class="kv-b">
+        <div class="kv-plan-tag">方案B · 时间滚动 (n=68)</div>
+        <div class="kv-value">73.5%</div>
+        <div class="kv-ci">95% CI [62.0–82.5]</div>
+      </div>
+    </div>
+    <div class="kv-note">三分类被简单规则"押胜率高者"封顶，LR与规则无统计显著差异。平局学不出来是核心瓶颈。</div>
+  </div>
+
+  <!-- Card 3: Score Top-5 -->
+  <div class="kv-card">
+    <div class="kv-label">比分 Top-5 覆盖率（泊松概率矩阵）</div>
+    <div class="kv-single">
+      <div class="kv-value">39.3%</div>
+      <div class="kv-ci">方案A [28.1–51.7] · n=62</div>
+      <div class="kv-tag">仅方案A</div>
+    </div>
+    <div class="kv-note">概率最高的5个比分任一命中。单点精确命中仅13.1%，比分预测的正确用法是概率分布而非单点。</div>
+  </div>
+
+  <!-- Card 4: Baseline -->
+  <div class="kv-card">
+    <div class="kv-label">对照 · 多数类基线</div>
+    <div class="kv-ab">
+      <div class="kv-a">
+        <div class="kv-plan-tag">方案A (n=62)</div>
+        <div class="kv-value">43.5%</div>
+        <div class="kv-ci">95% CI [31.9–55.9]</div>
+      </div>
+      <div class="kv-b">
+        <div class="kv-plan-tag">方案B (n=68)</div>
+        <div class="kv-value">41.2%</div>
+        <div class="kv-ci">95% CI [30.3–53.1]</div>
+      </div>
+    </div>
+    <div class="kv-note">无脑押多数类（负）。所有模型均显著优于基线（McNemar p=0.0003）。</div>
+  </div>
+
+  <!-- Card 5: LLM blind test -->
+  <div class="kv-card">
+    <div class="kv-label">大模型盲测 · 三分类（参考）</div>
+    <div class="kv-single">
+      <div class="kv-value">67%</div>
+      <div class="kv-ci">95% CI [54.7–77.7] · n=61</div>
+      <div class="kv-tag">不可复现</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== SECTION 1: DATA & METHODS ===== -->
+<section class="section">
+  <div class="section-title"><span class="num">01</span> 数据与方法</div>
+  <p class="text-secondary mb-16">完整流程：从原始战报 → 结构化表格 → 球队画像 → 模型预测，全程时间切分验证、严格防数据泄露。</p>
+
+  <div class="method-steps">
+    <div class="method-step">
+      <div class="step-num">1</div>
+      <div class="step-title">战报解析</div>
+      <div class="step-desc">python-docx 提取 5 份 Word → 正则解析出 427 场：时间、地点、对阵、比分、角球、任意球、定位球、点球、进球人、助攻、扑救、红黄牌。队名/比分覆盖 100%。</div>
+    </div>
+    <div class="method-step">
+      <div class="step-num">2</div>
+      <div class="step-title">队名规范化</div>
+      <div class="step-desc">117 个原始变体名 → 45 个真实队伍（如"计信院/计算机信息科学学院/计算机与信息技术学院"→ 计信）。37 支队伍 ≥10 场，画像样本充足。</div>
+    </div>
+    <div class="method-step">
+      <div class="step-num">3</div>
+      <div class="step-title">滚动画像（防泄露核心）</div>
+      <div class="step-desc">每队每场只累计该场比赛之前的数据：场均进球/失球/净胜球/胜率/角球/任意球/扑救。预测某场比赛时，绝不用到它自己的赛时数据。</div>
+    </div>
+    <div class="method-step">
+      <div class="step-num">4</div>
+      <div class="step-title">对称视角</div>
+      <div class="step-desc">校园足球无主客场意义 → 每场用 md5 固定随机指定视角队，特征 = 双方画像差（A−B），消除"标题左侧队"偏差。336/427 场入样（双方历史≥3场）。</div>
+    </div>
+    <div class="method-step">
+      <div class="step-num">5</div>
+      <div class="step-title">模型与验证</div>
+      <div class="step-desc">逻辑回归（三分类胜/平/负 与 二分类胜/不胜）、随机森林对比；比分用泊松模型（λ=联赛均进球×进攻指数×防守指数，概率矩阵 0–10）。验证：方案A＝2022–25训练→2026外推；方案B＝按时间滚动前80%→后20%。</div>
+    </div>
+  </div>
+
+  <div class="method-note">
+    <strong>改进注：</strong>md5随机视角虽消除了"左侧队"偏差，但更严谨的做法是双视角扩增（每场同时生成A−B和B−A两个样本）或取特征绝对值，未来改进可采用。
+  </div>
+</section>
+
+<!-- ===== SECTION 2: EXPERIMENT 1 ===== -->
+<section class="section">
+  <div class="section-title"><span class="num">02</span> 实验一：胜平负预测（14 种方法对比）</div>
+  <p class="text-secondary mb-16">三分类 = 胜/平/负；二分类 = 胜/不胜（平并入不胜）。全部方法都用相同滚动画像特征与切分，保证可比。所有准确率附 95% Wilson 置信区间。</p>
+
+  <!-- Chart A: 方案A -->
+  <div class="chart-wrap">
+    <div class="chart-title">方案A · 2022–25 训练 → 2026 外推（n=62）</div>
+    <div class="chart-subtitle">按准确率降序排列 · 误差棒 = 95% Wilson CI · 颜色区分方法类型</div>
+    <div id="chart-plan-a" class="chart-container-tall"></div>
+    <div class="chart-caption">
+      <strong>解读：</strong>LR二分类"胜/不胜"以80.6%领先，但与规则"押胜率"（77.4%）的CI高度重叠。三分类方法（LR三分类、RF）集中在71–74%区间，均未超越简单规则。平衡权重方法（61.3%/59.7%）因强行猜平局反而大幅掉分。多数类基线仅43.5%。
+    </div>
+  </div>
+
+  <!-- Chart B: 方案B -->
+  <div class="chart-wrap">
+    <div class="chart-title">方案B · 时间滚动 80/20（n=68）</div>
+    <div class="chart-subtitle">完整结果 · 含95% Wilson CI · 颜色区分方法类型</div>
+    <div id="chart-plan-b" class="chart-container-tall"></div>
+    <div class="chart-caption">
+      <strong>解读：</strong>方案B中LR二分类（82.4%）与LR-r5+h2h二分类（80.9%）位居前二，规则"押胜率"降至73.5%。三分类LR-all同样为73.5%。整体排序与方案A一致：二分类 > 规则 ≈ 三分类 > 平衡权重 > 基线。两种验证方案结论稳健。
+    </div>
+  </div>
+
+  <!-- Key findings -->
+  <div class="card">
+    <div class="card-title">关键发现</div>
+    <p style="font-size:14px; line-height:1.8; color:var(--text);">
+      <strong>近期窗口（近5场）反而更差：</strong>校园队场次少、5场窗口噪声大。<br>
+      <strong>交手史特征无提升：</strong>同队交手次数太少。<br>
+      <strong>平衡权重强行猜平局反而掉分：</strong>平局学不出来。
+    </p>
+  </div>
+
+  <!-- Confusion Matrix -->
+  <div class="subsection-title">三分类的硬伤：混淆矩阵（方案A，行=真实 列=预测）</div>
+  <div class="card">
+    <div class="confusion-grid">
+      <div class="cm-cell cm-header">真实＼预测</div>
+      <div class="cm-cell cm-header">胜</div>
+      <div class="cm-cell cm-header">平</div>
+      <div class="cm-cell cm-header">负</div>
+      <div class="cm-cell cm-row-header">胜（24场）</div>
+      <div class="cm-cell cm-correct">22</div>
+      <div class="cm-cell cm-zero">0</div>
+      <div class="cm-cell cm-wrong">2</div>
+      <div class="cm-cell cm-row-header">平（10场）</div>
+      <div class="cm-cell cm-wrong">7</div>
+      <div class="cm-cell cm-zero">0</div>
+      <div class="cm-cell cm-wrong">3</div>
+      <div class="cm-cell cm-row-header">负（28场）</div>
+      <div class="cm-cell cm-wrong">3</div>
+      <div class="cm-cell cm-zero">0</div>
+      <div class="cm-cell cm-correct">25</div>
+    </div>
+    <p class="text-small text-secondary mt-16" style="line-height:1.7;">
+      模型把所有比赛判成"胜"或"负"，<strong>10场平局全错</strong>。只看胜/负方向：47/52 = <strong>90.4% [79.4–95.8]</strong>（n=52）。平局占16.1%（10/62，方案A测试集；全336入样场为14.9%），画像差接近0的场次结果趋近随机。
+    </p>
+  </div>
+
+  <!-- Significance Tests -->
+  <div class="subsection-title">统计显著性检验</div>
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>对比</th>
+          <th class="num-col">差异</th>
+          <th>检验方法</th>
+          <th class="num-col">p 值</th>
+          <th>差异 95% CI</th>
+          <th>结论</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>LR二分类 vs 规则押胜率（方案A）</td>
+          <td class="num-col">+3.2pp</td>
+          <td>配对置换检验</td>
+          <td class="num-col">0.753</td>
+          <td>[−6.5, +12.9]pp</td>
+          <td><span class="tag-gray">不显著</span></td>
+        </tr>
+        <tr>
+          <td>LR二分类 vs 规则押胜率（方案B）</td>
+          <td class="num-col">+8.8pp</td>
+          <td>配对置换检验</td>
+          <td class="num-col">0.181</td>
+          <td>[−1.5, +19.1]pp</td>
+          <td><span class="tag-gray">不显著</span></td>
+        </tr>
+        <tr class="highlight-row">
+          <td>LR三分类 vs 多数类基线（方案A）</td>
+          <td class="num-col">+30.6pp</td>
+          <td>McNemar检验（b=22, c=3）</td>
+          <td class="num-col">0.0003</td>
+          <td>—</td>
+          <td><span class="tag-green">显著</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="text-small text-secondary mt-16" style="line-height:1.7;">
+      <strong>这意味着什么：</strong>在当前样本量下，逻辑回归相对简单规则的提升不具备统计显著性——两者本质都在判断强弱方向。模型显著优于多数类基线（p=0.0003），说明画像特征确实包含预测信息，但增量价值有限。
+    </p>
+  </div>
+
+  <!-- Calibration Analysis -->
+  <div class="subsection-title">概率校准分析（LR二分类，方案A，n=62）</div>
+
+  <div class="calib-grid">
+    <div class="calib-card">
+      <div class="calib-name">Brier Score</div>
+      <div class="calib-value">0.138</div>
+      <div class="calib-desc">越低越好（0=完美）· 衡量概率预测与实际结果的均方误差</div>
+    </div>
+    <div class="calib-card">
+      <div class="calib-name">Log Loss</div>
+      <div class="calib-value">0.421</div>
+      <div class="calib-desc">越低越好 · 对错误概率的惩罚更重，关注概率分布质量</div>
+    </div>
+    <div class="calib-card">
+      <div class="calib-name">ECE（期望校准误差）</div>
+      <div class="calib-value">0.123</div>
+      <div class="calib-desc">越低越好 · 各分箱预测概率与实际频率的加权平均偏差</div>
+    </div>
+  </div>
+
+  <!-- Reliability Diagram -->
+  <div class="chart-wrap">
+    <div class="chart-title">可靠性图（Reliability Diagram）· LR二分类方案A</div>
+    <div class="chart-subtitle">x = 平均预测概率 · y = 实际频率 · 点大小 = 样本数 · 对角线 = 完美校准</div>
+    <div id="chart-reliability" class="chart-container"></div>
+    <div class="chart-caption">
+      <strong>解读：</strong>概率预测的价值不在准确率而在校准度。Brier=0.138表示概率预测有一定可靠性，但ECE=0.123说明存在系统性偏差——<strong>低概率区间实际频率偏高</strong>（模型低估了弱队爆冷的概率），<strong>高概率区间接近完美</strong>（强队赢球的预测可靠）。点越大表示该分箱样本越多，0.9–1.0区间有12场且全部命中。
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 3: EXPERIMENT 2 - SCORE PREDICTION ===== -->
+<section class="section">
+  <div class="section-title"><span class="num">03</span> 实验二：比分预测（泊松模型）</div>
+  <p class="text-secondary mb-16">λ = 联赛平均进球 × 该队进攻指数 × 对手防守指数（指数由历史场均进球/失球估计，+0.5 平滑），生成 0–10 球完整比分概率矩阵。</p>
+
+  <div class="kv-grid">
+    <!-- Single point -->
+    <div class="kv-card">
+      <div class="kv-label">单点精确命中（押最可能比分）</div>
+      <div class="kv-ab">
+        <div class="kv-a">
+          <div class="kv-plan-tag">方案A (n=62)</div>
+          <div class="kv-value">13.1%</div>
+          <div class="kv-ci">95% CI [6.8–23.7]</div>
+        </div>
+        <div class="kv-b">
+          <div class="kv-plan-tag">方案B (n=68)</div>
+          <div class="kv-value">8.4%</div>
+          <div class="kv-ci">—</div>
+        </div>
+      </div>
+      <div class="kv-note">单点精确命中本身难度极高，校园足球比分分布太散。</div>
+    </div>
+
+    <!-- Top-3 -->
+    <div class="kv-card">
+      <div class="kv-label">比分 Top-3 覆盖率（方案A）</div>
+      <div class="kv-single">
+        <div class="kv-value">26.2%</div>
+        <div class="kv-ci">[16.9–38.3] · 概率最高3个比分任一命中</div>
+      </div>
+      <div class="kv-note">Top-3覆盖是单点的2倍，概率分布开始体现价值。</div>
+    </div>
+
+    <!-- Top-5 -->
+    <div class="kv-card">
+      <div class="kv-label">比分 Top-5 覆盖率（方案A）</div>
+      <div class="kv-single">
+        <div class="kv-value">39.3%</div>
+        <div class="kv-ci">[28.1–51.7] · 概率最高5个比分任一命中</div>
+      </div>
+      <div class="kv-note">Top-5覆盖接近4成，是比分预测的实用形态。</div>
+    </div>
+
+    <!-- Implied WDL -->
+    <div class="kv-card">
+      <div class="kv-label">隐含胜平负（泊松矩阵累加）</div>
+      <div class="kv-ab">
+        <div class="kv-a">
+          <div class="kv-plan-tag">方案A (n=62)</div>
+          <div class="kv-value">73.8%</div>
+          <div class="kv-ci">95% CI [61.7–83.1]</div>
+        </div>
+        <div class="kv-b">
+          <div class="kv-plan-tag">方案B (n=68)</div>
+          <div class="kv-value">74.7%</div>
+          <div class="kv-ci">95% CI [63.2–83.5]</div>
+        </div>
+      </div>
+      <div class="kv-note">比分模型顺带的胜平负判断与三分类模型持平，不牺牲方向能力。</div>
+    </div>
+  </div>
+
+  <!-- Score distribution -->
+  <div class="subsection-title">比分预测为什么难：训练期比分分布太散</div>
+  <div class="card">
+    <p class="text-small text-secondary mb-16">校园足球强弱分化大（强队常 3:0、5:1 打花弱队），最常出现的 1:0 也只占 7.7%——没有任何单一比分能"押注赢"。</p>
+    <div class="score-dist">
+      <div class="score-row"><div class="score-label">1:0</div><div class="score-bar-wrap"><div class="score-bar" style="width:100%;">7.7%</div></div><div class="score-pct">7.7%</div></div>
+      <div class="score-row"><div class="score-label">2:0</div><div class="score-bar-wrap"><div class="score-bar" style="width:93.5%;">7.2%</div></div><div class="score-pct">7.2%</div></div>
+      <div class="score-row"><div class="score-label">3:0</div><div class="score-bar-wrap"><div class="score-bar" style="width:85.7%;">6.6%</div></div><div class="score-pct">6.6%</div></div>
+      <div class="score-row"><div class="score-label">1:1 / 2:1</div><div class="score-bar-wrap"><div class="score-bar" style="width:71.4%;">5.5%</div></div><div class="score-pct">5.5%</div></div>
+      <div class="score-row"><div class="score-label">0:0</div><div class="score-bar-wrap"><div class="score-bar" style="width:53.2%;">4.1%</div></div><div class="score-pct">4.1%</div></div>
+      <div class="score-row"><div class="score-label">0:1 / 1:2</div><div class="score-bar-wrap"><div class="score-bar" style="width:50.6%;">3.9%</div></div><div class="score-pct">3.9%</div></div>
+      <div class="score-row"><div class="score-label">0:2 / 5:1</div><div class="score-bar-wrap"><div class="score-bar" style="width:42.9%;">3.3%</div></div><div class="score-pct">3.3%</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 4: SAMPLE LOSS ANALYSIS ===== -->
+<section class="section">
+  <div class="section-title"><span class="num">04</span> 样本流失分析（91场被剔除比赛）</div>
+  <p class="text-secondary mb-16">入样标准"双方历史≥3场"可能系统性排除最难预测的比赛，需评估对结论的影响。427场总样本中336场入样（78.9%），91场被剔除（21.1%）。被剔除比赛主要是早期比赛和新队伍——这些队伍历史数据不足，恰恰可能是预测难度最高的场景。</p>
+
+  <div class="chart-wrap">
+    <div class="chart-title">被剔除集 vs 入样集 vs 方案A测试集 · 规则准确率对比</div>
+    <div class="chart-subtitle">含95% Wilson CI误差棒 · 规则=押胜率高者</div>
+    <div id="chart-sample-loss" class="chart-container"></div>
+    <div class="chart-caption">
+      <strong>解读：</strong>被剔除比赛的规则准确率（59.3%）比入样集（68.2%）低<strong>8.8个百分点</strong>，证实"双方历史≥3场"的入样标准系统性排除了最难预测的比赛，导致测试集精度可能偏高。真实场景下对新队伍/早期比赛的预测能力会显著下降。
+    </div>
+  </div>
+
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr><th>数据集</th><th class="num-col">场次</th><th class="num-col">规则准确率</th><th>95% CI</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>91场被剔除</td><td class="num-col">91</td><td class="num-col">59.3%</td><td>[49.1–68.9]</td></tr>
+        <tr><td>336场入样（全）</td><td class="num-col">336</td><td class="num-col">68.2%</td><td>[63.0–72.9]</td></tr>
+        <tr class="highlight-row"><td>方案A测试集</td><td class="num-col">62</td><td class="num-col">77.4%</td><td>[65.6–86.0]</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== SECTION 5: LLM BLIND TEST ===== -->
+<section class="section">
+  <div class="section-title"><span class="num">05</span> 实验三（参考）：大模型盲测 · 不可复现案例</div>
+  <p class="text-secondary mb-16">把大模型当作"读过战报的资深球评"：考卷只给两队 2022–25 历史画像（场均进球/失球/净胜球/胜率/场次），不含比分，逐场盲猜 2026 年比赛，脚本判分。同口径（双方画像≥3场）61 场。</p>
+
+  <div class="warning-card">
+    <div class="warning-title">不可复现声明</div>
+    <p>大模型盲测为单次实验，未记录模型名称、版本、温度参数、随机种子及完整prompt，无法复现。以下数字仅作案例参考，不参与主实验的统计对比与结论推导。</p>
+  </div>
+
+  <div class="kv-grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="kv-card">
+      <div class="kv-label">大模型盲测 · 三分类（参考）</div>
+      <div class="kv-single">
+        <div class="kv-value">67%</div>
+        <div class="kv-ci">95% CI [54.7–77.7] · n=61</div>
+      </div>
+    </div>
+    <div class="kv-card">
+      <div class="kv-label">大模型盲测 · 方向（排除平局，参考）</div>
+      <div class="kv-single">
+        <div class="kv-value">80%</div>
+        <div class="kv-ci">95% CI [67.5–89.0] · n=51</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">平局表现（10场）</div>
+    <p style="font-size:14px;"><strong>0 场猜对</strong> —— 与 ML 相同的共同盲区。</p>
+  </div>
+
+  <div class="subsection-title">大模型 vs 机器学习 · 2026 外推（同口径 61–62 场）</div>
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr><th>预测者</th><th class="num-col">三分类准确率</th><th>95% CI</th><th>可复现性</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ML · 二分类胜/不胜</td><td class="num-col">80.6%</td><td>[69.1–88.5]</td><td><span class="tag-green">可复现</span></td><td>任务重定义后的最高形态</td></tr>
+        <tr><td>ML · 规则（押胜率高者）</td><td class="num-col">77.4%</td><td>[65.6–86.0]</td><td><span class="tag-green">可复现</span></td><td>三分类被简单规则封顶</td></tr>
+        <tr><td>ML · 逻辑回归三分类</td><td class="num-col">74.2%</td><td>[62.1–83.5]</td><td><span class="tag-green">可复现</span></td><td>滚动画像特征</td></tr>
+        <tr><td>大模型盲测</td><td class="num-col">67%</td><td>[54.7–77.7]</td><td><span class="tag-orange">不可复现</span></td><td>只看画像考卷、无比分</td></tr>
+        <tr class="baseline-row"><td>多数类基线</td><td class="num-col">43.5%</td><td>[31.9–55.9]</td><td><span class="tag-green">可复现</span></td><td>无脑押多数类</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">错误结构（16 场）与参考性结论</div>
+    <p style="font-size:14px; line-height:1.8; margin-bottom:12px;">
+      错误 = 10 场"平局被猜成胜负" + 6 场"强弱方向误判"（集中在势均力敌与弱队互啄场次，如教育 vs 园艺园林、马院 vs 电子信息）。
+    </p>
+    <div style="font-size:14px; line-height:1.9;">
+      <p><strong>①</strong> 大模型盲测 67%（三分类）、80%（方向），略低于机器学习的 74.2% / 90.4%（参考性结论）。机器学习在结构化数值预测上仍有优势；大模型的核心价值在对话交互、解释与内容生成，而非纯数值预测。</p>
+      <p class="mt-8"><strong>②</strong> 混合架构的价值不在"预测更准"，在"产品可用"。大模型负责对话、解释、阵容建议、赛后复盘；ML 负责提供可复现、可审计的数值（画像/概率）。预测准确率由数据决定，产品体验由混合架构决定。</p>
+      <p class="mt-8"><strong>③</strong> 关于 RAG 战术知识库：RAG 提升的是内容能力（战术解释、知识问答、建议质量），不会改变预测准确率——比赛结果的预测只由画像数据的信息量决定。战术库与预测模块是平行的两个能力，不是相互增益的关系。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 6: CONCLUSIONS ===== -->
+<section class="section">
+  <div class="section-title"><span class="num">06</span> 结论与建议</div>
+  <ol class="conclusion-list">
+    <li><strong>方向预测有效且可靠。</strong>历史画像（场均进球/失球/净胜球/胜率）能真实区分强弱：二分类"胜/不胜"准确率 80.6% [69.1–88.5]（外推）/ 82.4% [71.7–89.6]（滚动），比多数类基线高约 38 个百分点，差异经 McNemar 检验显著（p=0.0003）。</li>
+    <li><strong>三分类"胜平负"被简单规则封顶，LR与规则无显著差异。</strong>LR二分类与规则押胜率在方案A（差异+3.2pp，p=0.753）和方案B（差异+8.8pp，p=0.181）下均无统计显著性差异，两者均显著优于基线。平局占16.1%（10/62，方案A测试集；全336入样场为14.9%）且学不出来，模型与"押胜率高者"规则本质都在判断强弱方向。所有"改进"（近5场窗口、交手史、随机森林、平衡权重）均未稳定超越规则。</li>
+    <li><strong>比分能猜，但正确用法是概率分布。</strong>单点精确命中 13.1% [6.8–23.7]（方案A），单点精确命中本身难度极高；按概率矩阵猜 Top-3 覆盖率 26.2% [16.9–38.3]、Top-5 覆盖率 39.3% [28.1–51.7]。比分模型顺带的胜平负判断（73.8% [61.7–83.1]）与三分类模型持平，不牺牲方向能力。概率校准方面，Brier=0.138、ECE=0.123，低概率区间存在系统性偏差。</li>
+    <li><strong>特征有效性排序（实测）：</strong>历史胜率 / 净胜球 / 场均进球（强，与胜率相关 0.95）＞ 场均失球 / 扑救（中）＞ 角球 / 任意球（弱，相关仅 0.15，且 33% 场次缺失）＞ 红黄牌 / 定位球（不可用，记录缺失严重，黄牌仅 33 场）。</li>
+    <li><strong>推荐最终形态：</strong>一个"滚动画像 + 泊松"混合模型，输出 胜/不胜概率 + 比分概率分布 Top-5，方向判断约 74–80%、Top-5 比分覆盖率约 40%。适合做：球队强弱排行（画像榜）、赛后复盘分析、竞猜式预测。每届打完更新数据即可滚动重训。</li>
+    <li><strong>阵容轮换（turnover）的固有局限：</strong>校园足球队每年面临毕业轮换，2022–25年的球队画像到2026年可能因核心球员毕业而失效。这是方案A（外推）的固有局限。"近5场窗口反而更差"有两种替代解释：①跨年画像失效（阵容变化导致历史数据不代表当前实力）；②5场窗口样本量太小、噪声过大。当前数据无法区分两者，需更多赛季数据验证。</li>
+    <li><strong>样本偏差警示：</strong>"双方历史≥3场"的入样标准排除了91场（21%）最难预测的比赛，被剔除集规则准确率仅59.3% [49.1–68.9]，比入样集低8.8pp。报告中的精度数字可能高估了真实场景（含新队伍/早期比赛）下的预测能力。</li>
+  </ol>
+</section>
+
+<!-- ===== APPENDIX ===== -->
+<section class="section">
+  <div class="section-title"><span class="num">附</span> 数据口径附录</div>
+  <div class="appendix">
+    <p>全部数字来自 <strong>parsed3.json</strong>（427 场，队名/比分 100% 覆盖）；336/427 入样（双方历史画像≥3场），91场被剔除（21.1%）；特征 = 场均进球·失球·净胜球·胜率·角球·任意球·扑救（滚动画像，只用该场之前累计）；随机视角（md5 固定 seed）消除"左侧队"偏差；方案A = 2022–25 训练 → 2026 外推（n=62）；方案B = 时间滚动前 80% → 后 20%（n=68）；比分模型 λ = 联赛均进球 × 进攻指数 × 防守指数（+0.5 平滑），泊松矩阵 0–10 球；训练期比分分布统计自 2022–25 共 363 场；点球大战按常规时间平局计入。准确率置信区间为 95% Wilson 区间。配对置换检验（10000次重抽样）用于LR vs 规则对比；McNemar检验用于模型 vs 基线。校准指标（Brier/LogLoss/ECE）基于LR二分类方案A预测概率。大模型盲测：考卷仅含 2022–25 画像、无 2026 比分（quiz2026.json），预测（predictions_llm.json）由 judge_llm.py 判分；三分类 67%、方向 80%（61 场同口径），单次实验不可复现，仅作参考。预测实验脚本：ml_train.py / ml_compare.py / ml_score.py / gen_quiz.py / judge_llm.py（工作目录 new-chat-3）。</p>
+  </div>
+</section>
+
+</div><!-- /.container -->
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script>
+(function() {
+  var C_GREEN = '#2D6A4F';
+  var C_ORANGE = '#C87533';
+  var C_BLUE = '#2C5F8A';
+  var C_BROWN = '#7A6C5D';
+  var C_GRAY = '#8B95A8';
+  var C_NAVY = '#0F2B46';
+  var C_AXIS = '#555F73';
+  var C_GRID = '#EEF0F4';
+
+  /* ===== Helper: horizontal bar with CI error bars ===== */
+  function makeHBarOption(names, vals, colors, lo, hi, xMax) {
+    var barData = vals.map(function(v, i) {
+      return { value: v, itemStyle: { color: colors[i], borderRadius: [0, 3, 3, 0] } };
+    });
+    var errData = lo.map(function(l, i) {
+      return [i, l, hi[i]];
+    });
+    return {
+      backgroundColor: 'transparent',
+      tooltip: {
+        trigger: 'axis',
+        triggerOn: 'click',
+        renderMode: 'richText',
+        confine: true,
+        axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,0.04)' } },
+        formatter: function(params) {
+          if (!params || params.length < 2 || !params[0] || !params[1] || !params[1].value) return '';
+          var bar = params[0];
+          var err = params[1];
+          return bar.name + '<br/>准确率：<b>' + bar.value + '%</b><br/>95% Wilson CI：[' + err.value[1] + '\u2013' + err.value[2] + ']';
+        }
+      },
+      grid: { left: 8, right: 50, top: 8, bottom: 8, containLabel: true },
+      xAxis: {
+        type: 'value',
+        max: xMax || 100,
+        axisLabel: { color: C_AXIS, fontSize: 11, formatter: '{value}%' },
+        axisLine: { lineStyle: { color: C_GRID } },
+        splitLine: { lineStyle: { color: C_GRID, type: 'dashed' } }
+      },
+      yAxis: {
+        type: 'category',
+        data: names,
+        inverse: true,
+        axisLabel: { color: C_AXIS, fontSize: 11 },
+        axisLine: { lineStyle: { color: C_GRID } },
+        axisTick: { show: false }
+      },
+      series: [
+        {
+          type: 'bar',
+          data: barData,
+          barWidth: '52%',
+          z: 2,
+          label: {
+            show: true,
+            position: 'right',
+            formatter: '{c}%',
+            fontSize: 11,
+            color: C_AXIS,
+            fontWeight: 600
+          }
+        },
+        {
+          type: 'custom',
+          data: errData,
+          z: 3,
+          renderItem: function(params, api) {
+            var yIdx = api.value(0);
+            var ciLo = api.value(1);
+            var ciHi = api.value(2);
+            var ptLo = api.coord([ciLo, yIdx]);
+            var ptHi = api.coord([ciHi, yIdx]);
+            var xLo = ptLo[0];
+            var xHi = ptHi[0];
+            var y = ptLo[1];
+            var cap = 5;
+            return {
+              type: 'group',
+              children: [
+                { type: 'line', shape: { x1: xLo, y1: y, x2: xHi, y2: y }, style: { stroke: C_AXIS, lineWidth: 1.5 } },
+                { type: 'line', shape: { x1: xLo, y1: y - cap, x2: xLo, y2: y + cap }, style: { stroke: C_AXIS, lineWidth: 1.5 } },
+                { type: 'line', shape: { x1: xHi, y1: y - cap, x2: xHi, y2: y + cap }, style: { stroke: C_AXIS, lineWidth: 1.5 } }
+              ]
+            };
+          }
+        }
+      ]
+    };
+  }
+
+  /* ===== Plan A Data ===== */
+  var aNames = ['LR\u4e8c\u5206\u7c7b\u00b7\u80dc/\u4e0d\u80dc','\u89c4\u5219\u00b7\u62bc\u80dc\u7387\u9ad8\u8005','LR\u4e09\u5206\u7c7b(all)','LR\u4e09\u5206\u7c7b(hist+h2h)','RF-all','\u89c4\u5219\u00b7\u62bc\u51c0\u80dc\u7403','LR-\u8fd15\u573a','\u89c4\u5219\u00b7\u573a\u5747\u8fdb\u7403','LR-\u5e73\u8861\u6743\u91cd','RF-\u5e73\u8861\u6743\u91cd','\u591a\u6570\u7c7b\u57fa\u7ebf'];
+  var aVals = [80.6,77.4,74.2,74.2,74.2,72.6,71.0,69.4,61.3,59.7,43.5];
+  var aColors = [C_GREEN,C_ORANGE,C_BLUE,C_BLUE,C_BLUE,C_ORANGE,C_BLUE,C_ORANGE,C_BROWN,C_BROWN,C_GRAY];
+  var aLo = [69.1,65.6,62.1,62.1,62.1,60.4,58.8,57.1,48.9,47.3,31.9];
+  var aHi = [88.5,86.0,83.5,83.5,83.5,82.1,80.8,79.5,72.4,71.0,55.9];
+
+  /* ===== Plan B Data ===== */
+  var bNames = ['LR\u4e8c\u5206\u7c7b(all)','LR-r5+h2h(\u4e8c\u5206\u7c7b)','\u89c4\u5219\u00b7\u62bc\u80dc\u7387\u9ad8\u8005','LR-all(\u4e09\u5206\u7c7b)','LR-hist+h2h','RF-all','\u89c4\u5219\u00b7\u62bc\u51c0\u80dc\u7403','LR-hist(\u4e09\u5206\u7c7b)','LR-recent5','LR-r5+h2h(\u4e09\u5206\u7c7b)','LR-\u5e73\u8861\u6743\u91cd','\u89c4\u5219\u00b7\u573a\u5747\u8fdb\u7403','RF-\u5e73\u8861\u6743\u91cd','\u591a\u6570\u7c7b\u57fa\u7ebf'];
+  var bVals = [82.4,80.9,73.5,73.5,70.6,70.6,69.1,69.1,67.6,67.6,66.2,64.7,63.2,41.2];
+  var bColors = [C_GREEN,C_GREEN,C_ORANGE,C_BLUE,C_BLUE,C_BLUE,C_ORANGE,C_BLUE,C_BLUE,C_BLUE,C_BROWN,C_ORANGE,C_BROWN,C_GRAY];
+  var bLo = [71.7,70.0,62.0,62.0,58.9,58.9,57.3,57.3,55.8,55.8,54.4,52.8,51.3,30.3];
+  var bHi = [89.6,88.5,82.5,82.5,80.1,80.1,78.8,78.8,77.5,77.5,76.3,75.0,73.7,53.1];
+
+  /* ===== Init charts ===== */
+  var elA = document.getElementById('chart-plan-a');
+  var elB = document.getElementById('chart-plan-b');
+  var elRel = document.getElementById('chart-reliability');
+  var elLoss = document.getElementById('chart-sample-loss');
+
+  var chartA = echarts.init(elA);
+  chartA.setOption(makeHBarOption(aNames, aVals, aColors, aLo, aHi, 100));
+
+  var chartB = echarts.init(elB);
+  chartB.setOption(makeHBarOption(bNames, bVals, bColors, bLo, bHi, 100));
+
+  /* ===== Reliability Diagram ===== */
+  var relOption = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'item',
+      triggerOn: 'click',
+      renderMode: 'richText',
+      confine: true,
+      formatter: function(params) {
+        if (!params || !params.value) return '';
+        var d = params.value;
+        return '\u5206\u7bb1\uff1a' + params.name + '<br/>\u5e73\u5747\u9884\u6d4b\u6982\u7387\uff1a<b>' + d[0] + '</b><br/>\u5b9e\u9645\u9891\u7387\uff1a<b>' + d[1] + '</b><br/>\u6837\u672c\u6570\uff1a' + d[2];
+      }
+    },
+    grid: { left: 10, right: 20, top: 20, bottom: 40, containLabel: true },
+    xAxis: {
+      type: 'value',
+      name: '\u5e73\u5747\u9884\u6d4b\u6982\u7387',
+      nameLocation: 'middle',
+      nameGap: 28,
+      nameTextStyle: { color: C_AXIS, fontSize: 12 },
+      min: 0,
+      max: 1,
+      axisLabel: { color: C_AXIS, fontSize: 11 },
+      axisLine: { lineStyle: { color: C_GRID } },
+      splitLine: { lineStyle: { color: C_GRID, type: 'dashed' } }
+    },
+    yAxis: {
+      type: 'value',
+      name: '\u5b9e\u9645\u9891\u7387',
+      nameLocation: 'middle',
+      nameGap: 35,
+      nameTextStyle: { color: C_AXIS, fontSize: 12 },
+      min: 0,
+      max: 1,
+      axisLabel: { color: C_AXIS, fontSize: 11 },
+      axisLine: { lineStyle: { color: C_GRID } },
+      splitLine: { lineStyle: { color: C_GRID, type: 'dashed' } }
+    },
+    series: [
+      {
+        type: 'scatter',
+        data: [
+          { name: '0.0\u20130.1', value: [0.036, 0.125, 8] },
+          { name: '0.1\u20130.2', value: [0.154, 0.250, 8] },
+          { name: '0.2\u20130.3', value: [0.262, 0.000, 1] },
+          { name: '0.3\u20130.4', value: [0.344, 0.600, 5] },
+          { name: '0.4\u20130.5', value: [0.442, 0.200, 5] },
+          { name: '0.5\u20130.6', value: [0.572, 0.667, 3] },
+          { name: '0.6\u20130.7', value: [0.650, 0.500, 6] },
+          { name: '0.7\u20130.8', value: [0.752, 0.857, 7] },
+          { name: '0.8\u20130.9', value: [0.860, 1.000, 7] },
+          { name: '0.9\u20131.0', value: [0.960, 1.000, 12] }
+        ],
+        symbolSize: function(data) {
+          if (!data || !data[2]) return 8;
+          return Math.sqrt(data[2]) * 7 + 6;
+        },
+        itemStyle: {
+          color: C_BLUE,
+          opacity: 0.75,
+          borderColor: C_NAVY,
+          borderWidth: 1
+        },
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          lineStyle: { color: C_GRAY, type: 'dashed', width: 1.5 },
+          label: { show: false },
+          data: [[{ coord: [0, 0] }, { coord: [1, 1] }]]
+        }
+      }
+    ]
+  };
+  var chartRel = echarts.init(elRel);
+  chartRel.setOption(relOption);
+
+  /* ===== Sample Loss Bar (vertical with error bars) ===== */
+  var lossNames = ['91\u573a\u88ab\u5254\u9664', '336\u573a\u5165\u6837(\u5168)', '\u65b9\u6848A\u6d4b\u8bd5\u96c6'];
+  var lossVals = [59.3, 68.2, 77.4];
+  var lossColors = [C_ORANGE, C_BLUE, C_GREEN];
+  var lossLo = [49.1, 63.0, 65.6];
+  var lossHi = [68.9, 72.9, 86.0];
+
+  var lossBarData = lossVals.map(function(v, i) {
+    return { value: v, itemStyle: { color: lossColors[i], borderRadius: [3, 3, 0, 0] } };
+  });
+  var lossErrData = lossLo.map(function(l, i) {
+    return [i, l, lossHi[i]];
+  });
+
+  var lossOption = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      triggerOn: 'click',
+      renderMode: 'richText',
+      confine: true,
+      axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,0.04)' } },
+      formatter: function(params) {
+        if (!params || params.length < 2 || !params[0] || !params[1] || !params[1].value) return '';
+        var bar = params[0];
+        var err = params[1];
+        return bar.name + '<br/>\u89c4\u5219\u51c6\u786e\u7387\uff1a<b>' + bar.value + '%</b><br/>95% Wilson CI\uff1a[' + err.value[1] + '\u2013' + err.value[2] + ']';
+      }
+    },
+    grid: { left: 10, right: 20, top: 20, bottom: 10, containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: lossNames,
+      axisLabel: { color: C_AXIS, fontSize: 12, fontWeight: 600 },
+      axisLine: { lineStyle: { color: C_GRID } },
+      axisTick: { show: false }
+    },
+    yAxis: {
+      type: 'value',
+      max: 100,
+      axisLabel: { color: C_AXIS, fontSize: 11, formatter: '{value}%' },
+      axisLine: { lineStyle: { color: C_GRID } },
+      splitLine: { lineStyle: { color: C_GRID, type: 'dashed' } }
+    },
+    series: [
+      {
+        type: 'bar',
+        data: lossBarData,
+        barWidth: '38%',
+        z: 2,
+        label: {
+          show: true,
+          position: 'top',
+          formatter: '{c}%',
+          fontSize: 13,
+          fontWeight: 700,
+          color: C_NAVY
+        }
+      },
+      {
+        type: 'custom',
+        data: lossErrData,
+        z: 3,
+        renderItem: function(params, api) {
+          var xIdx = api.value(0);
+          var ciLo = api.value(1);
+          var ciHi = api.value(2);
+          var ptLo = api.coord([xIdx, ciLo]);
+          var ptHi = api.coord([xIdx, ciHi]);
+          var x = ptLo[0];
+          var yLo = ptLo[1];
+          var yHi = ptHi[1];
+          var cap = 6;
+          return {
+            type: 'group',
+            children: [
+              { type: 'line', shape: { x1: x, y1: yLo, x2: x, y2: yHi }, style: { stroke: C_AXIS, lineWidth: 1.5 } },
+              { type: 'line', shape: { x1: x - cap, y1: yLo, x2: x + cap, y2: yLo }, style: { stroke: C_AXIS, lineWidth: 1.5 } },
+              { type: 'line', shape: { x1: x - cap, y1: yHi, x2: x + cap, y2: yHi }, style: { stroke: C_AXIS, lineWidth: 1.5 } }
+            ]
+          };
+        }
+      }
+    ]
+  };
+  var chartLoss = echarts.init(elLoss);
+  chartLoss.setOption(lossOption);
+
+  /* ===== Responsive ===== */
+  window.addEventListener('resize', function() {
+    chartA.resize();
+    chartB.resize();
+    chartRel.resize();
+    chartLoss.resize();
+  });
+})();
+</script>
+</body>
+</html>
