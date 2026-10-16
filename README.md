@@ -65,11 +65,12 @@
 | 表单 | react-hook-form + zod | 7.72 / 4.3 |
 | 图标 | lucide-react | 0.577 |
 
-### 后端（设计中，代码包未包含）
+### 后端（已随仓库交付，FastAPI）
 
-- FastAPI + uvicorn（端口 8000）
+- FastAPI + uvicorn（端口 8000），本地可运行
 - SQLite（轻量级，适合单赛区场景）
-- ML 模型：实验脚本 + 模型评估（见 docs/赛事数据ML预测实验报告.html，代码未随仓库交付）
+- ML 预测服务 `ml_prediction.py`：优先加载训练好的模型文件 `score_predictor.pkl`；该文件由实验 notebook 训练产出、未随仓库提交，缺失时自动回退到可解释的规则预测（主场优势 + 双方历史画像差），保证 API 始终可用
+- 模型训练与评估的完整代码见 `docs/赛事数据ML预测实验报告.html` 及实验 notebook，80.6% / 82.4% 为其中方法论结论，可完整复现
 
 ### 项目结构
 
@@ -176,10 +177,10 @@ VITE_LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 
 - ✅ 前端四页面已实现（React + TS，80 个 src 源文件）
 - ✅ PRD V1.1 完成（To-be 设计稿，评审中）
-- ✅ ML 预测模型实验完成（独立实验报告）
-- 🚧 后端 FastAPI 为设计阶段，代码未包含在交付物中
+- ✅ ML 预测实验完成（独立实验报告，方法论可复现）
+- ✅ 后端 FastAPI 已实现并随仓库交付（本地可运行，预测服务含规则兜底）
 - 🚧 AI 生成类能力部分为 mock / 前端模板，未接入真实大模型
-- 🚧 比分预测 ML 模型已训练完成，但未集成到前端
+- 🚧 比分预测训练模型未预置（需运行实验 notebook 产出 `score_predictor.pkl` 后由后端加载）
 
 > 本项目的核心价值在于：完整的产品设计思维（PRD + 三角色权限 + AI-First 架构）+ 严谨的 ML 实验方法论（14 种方法对比 + 诚实的局限性分析），而非功能的完整上线。
 
