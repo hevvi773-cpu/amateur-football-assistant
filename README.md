@@ -155,13 +155,20 @@ football-ai-assistant/
 ### 方式一：Docker 一键部署（推荐）
 
 ```bash
-# 配置大模型（可选，不配则 AI 生成类能力走内置模板）
+# 0. 配置大模型（可选，不配则 AI 生成类能力走内置模板）
 cp .env.example .env   # 编辑 .env 填入 LLM_API_KEY 等
 
+# 1. 构建镜像（compose 引用的是本地已构建的镜像名，首次必须先构建）
+docker build -f Dockerfile.backend  -t football-ai-backend:latest  .
+docker build -f Dockerfile.frontend -t football-ai-frontend:latest .
+
+# 2. 启动
 docker compose up -d
 ```
 
 访问 <http://localhost:8080>。nginx 将 `/api` 反代到后端容器，前端无需关心后端地址。
+
+> 两个 Dockerfile 的构建上下文都是**仓库根目录**。本仓库前端为扁平结构（`src/`、`public/`、`shared/`、`scripts/` 直接在根目录），不存在 `frontend/` 子目录。
 
 ### 方式二：本地前后端分离
 

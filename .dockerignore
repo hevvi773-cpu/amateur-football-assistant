@@ -1,0 +1,37 @@
+# Docker 构建上下文排除项（前端/后端镜像共用）
+# 目的：不要把源码仓库里的重型/无关产物打进镜像，同时避免污染构建缓存
+
+# 版本控制
+.git
+.githooks
+.github
+
+# 依赖与构建产物
+node_modules
+dist
+build
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+
+# 文档与实验产物（体积大，镜像用不到）
+docs
+Docker镜像
+网页构建产物
+原始赛事数据
+football_ml_experiment.ipynb
+README.en.md
+AGENTS.md
+
+# 注意：backend/ 不能排除 —— Dockerfile.backend 需要 COPY backend/requirements.txt、
+# backend/app、backend/data（含 football.db）、backend/models（含 score_predictor.pkl）。
+# 前端镜像因此会多带一份 backend 源码（约 11MB），无副作用。
+
+# 图片与凭据
+_issue.png
+.env
+.env.local
+.idea
+.DS_Store
+logs

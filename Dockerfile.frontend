@@ -1,15 +1,22 @@
 # 足球AI助手 - 前端镜像（多阶段构建）
+# 构建上下文 = 仓库根目录：
+#   docker build -f Dockerfile.frontend -t football-ai-frontend:latest .
+#
+# 注意：本仓库前端为「扁平结构」（src/ public/ shared/ scripts/ 直接在根目录），
+#       不存在 frontend/ 子目录。需要排除的目录见 .dockerignore。
 # 阶段1：构建 React 静态文件
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
 # 先装依赖（利用缓存）
-COPY frontend/package.json frontend/package-lock.json* ./
+# 加 --ignore-scripts：跳过 package.json 里的 prepare（scripts/setup-git-hooks.mjs），
+# 此时 scripts/ 还没复制进镜像，跑 prepare 会失败。
+COPY package.json package-lock.json* ./
 RUN npm install --ignore-scripts --no-audit --no-fund
 
-# 复制源码
-COPY frontend/ .
+# 复制源码（.dockerignore 已排除 backend/ docs/ .git/ node_modules/ 等）
+COPY . .
 
 # Docker 环境下 API 走相对路径 /api（由 nginx 反代到 backend）
 RUN sed -i 's|http://localhost:8010/api|/api|g' src/lib/api.ts

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>足球AI助手 - 管理后台</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; padding: 20px; }
+.container { max-width: 900px; margin: 0 auto; }
+h1 { font-size: 24px; margin-bottom: 20px; color: #1a1a2e; }
+.card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card h2 { font-size: 18px; margin-bottom: 16px; color: #1a1a2e; display: flex; align-items: center; gap: 8px; }
+.card h2 .icon { font-size: 20px; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 14px; color: #666; margin-bottom: 6px; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #4f6ef7; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500; transition: all 0.2s; margin-right: 8px; margin-bottom: 8px; }
+.btn-primary { background: #4f6ef7; color: #fff; }
+.btn-primary:hover { background: #3b5de7; }
+.btn-success { background: #10b981; color: #fff; }
+.btn-success:hover { background: #059669; }
+.btn-warning { background: #f59e0b; color: #fff; }
+.btn-warning:hover { background: #d97706; }
+.btn-info { background: #06b6d4; color: #fff; }
+.btn-info:hover { background: #0891b2; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.result { margin-top: 16px; padding: 16px; border-radius: 8px; font-size: 14px; line-height: 1.6; }
+.result-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+.result-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+.result-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+.result-warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.result .label { font-weight: 600; margin-right: 8px; }
+.muted { color: #999; font-size: 12px; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
+.stat-item { background: #f8fafc; border-radius: 8px; padding: 16px; text-align: center; }
+.stat-item .value { font-size: 28px; font-weight: 700; color: #4f6ef7; }
+.stat-item .label { font-size: 13px; color: #666; margin-top: 4px; }
+.status-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.status-on { background: #dcfce7; color: #166534; }
+.status-off { background: #fee2e2; color: #991b1b; }
+.prob-bar { display: flex; height: 28px; border-radius: 6px; overflow: hidden; margin: 10px 0; }
+.prob-home { background: #4f6ef7; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; }
+.prob-draw { background: #94a3b8; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; }
+.prob-away { background: #f59e0b; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; }
+.score-display { font-size: 32px; font-weight: 700; color: #1a1a2e; text-align: center; margin: 10px 0; }
+.score-display .vs { color: #999; font-size: 20px; margin: 0 12px; }
+.tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; }
+.tab { padding: 10px 20px; cursor: pointer; font-size: 14px; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+.tab.active { color: #4f6ef7; border-bottom-color: #4f6ef7; font-weight: 600; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.back-link { display: inline-block; margin-bottom: 16px; color: #4f6ef7; text-decoration: none; font-size: 14px; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="http://localhost:8080/" class="back-link">← 返回足球助手</a>
+  <h1>⚽ 足球AI助手 · 管理后台</h1>
+
+  <!-- 系统概览 -->
+  <div class="card">
+    <h2><span class="icon">📊</span> 系统概览</h2>
+    <div class="stats-grid">
+      <div class="stat-item"><div class="value" id="statTeams">-</div><div class="label">参赛球队</div></div>
+      <div class="stat-item"><div class="value" id="statMatches">-</div><div class="label">比赛记录</div></div>
+      <div class="stat-item"><div class="value" id="statPlayers">-</div><div class="label">注册球员</div></div>
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+      <div>预测模型：<span class="status-badge status-off" id="badgeML">检测中...</span></div>
+      <div>大模型：<span class="status-badge status-off" id="badgeLLM">检测中...</span></div>
+    </div>
+    <button class="btn btn-info" onclick="loadOverview()">🔄 刷新概览</button>
+  </div>
+
+  <!-- 大模型配置 -->
+  <div class="card">
+    <h2><span class="icon">⚙️</span> 大模型配置</h2>
+    <div class="form-group">
+      <label>API Key（密钥）</label>
+      <input type="password" id="apiKey" placeholder="sk-xxxxxxxx">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>模型名称</label>
+        <input type="text" id="modelName" placeholder="gpt-4o-mini / qwen-plus / ep-xxx">
+      </div>
+      <div class="form-group">
+        <label>接口地址（Base URL）</label>
+        <input type="text" id="baseUrl" placeholder="https://api.openai.com/v1">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>AI 模式</label>
+      <select id="aiMode">
+        <option value="auto">auto（有Key用大模型，无Key自动降级模板）</option>
+        <option value="llm">llm（强制使用大模型，无Key会报错）</option>
+        <option value="mock">mock（强制使用内置模板，不调用大模型）</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="loadConfig()">📥 读取当前配置</button>
+    <button class="btn btn-success" onclick="saveConfig()">💾 保存配置</button>
+    <button class="btn btn-warning" onclick="testConnection()">🔌 测试连通性</button>
+    <div id="configResult"></div>
+  </div>
+
+  <!-- AI 能力测试 -->
+  <div class="card">
+    <h2><span class="icon">🧪</span> AI 能力测试</h2>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('predict')">比分预测</div>
+      <div class="tab" onclick="switchTab('tactics')">战术攻略</div>
+      <div class="tab" onclick="switchTab('parse')">赛程解析</div>
+    </div>
+
+    <!-- 比分预测 -->
+    <div class="tab-content active" id="tab-predict">
+      <div class="form-group">
+        <label>选择比赛</label>
+        <select id="predictMatch"></select>
+      </div>
+      <button class="btn btn-primary" onclick="testPredict()">🔮 开始预测</button>
+      <div id="predictResult"></div>
+    </div>
+
+    <!-- 战术攻略 -->
+    <div class="tab-content" id="tab-tactics">
+      <div class="form-group">
+        <label>选择比赛</label>
+        <select id="tacticsMatch"></select>
+      </div>
+      <button class="btn btn-primary" onclick="testTactics()">📋 生成战术攻略</button>
+      <div id="tacticsResult"></div>
+    </div>
+
+    <!-- 赛程解析 -->
+    <div class="tab-content" id="tab-parse">
+      <div class="form-group">
+        <label>上传赛程文件（.txt / .docx）</label>
+        <input type="file" id="parseFile" accept=".txt,.docx">
+      </div>
+      <button class="btn btn-primary" onclick="testParse()">📄 解析赛程</button>
+      <div id="parseResult"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'http://localhost:8080/api';
+
+// ========== 工具函数 ==========
+async function apiGet(path) {
+  const res = await fetch(API_BASE + path);
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(API_BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+function showResult(elementId, html, type = 'info') {
+  document.getElementById(elementId).innerHTML =
+    `<div class="result result-${type}">${html}</div>`;
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ========== 系统概览 ==========
+async function loadOverview() {
+  try {
+    const [status, matches, players] = await Promise.all([
+      apiGet('/ai/status'),
+      apiGet('/matches?limit=1'),
+      apiGet('/players?limit=1')
+    ]);
+    document.getElementById('statTeams').textContent = status.prediction ? '60' : '-';
+    document.getElementById('statMatches').textContent = matches.total || matches.length || '-';
+    document.getElementById('statPlayers').textContent = players.total || players.length || '-';
+
+    const mlBadge = document.getElementById('badgeML');
+    if (status.prediction && status.prediction.model === 'ml_model') {
+      mlBadge.textContent = '已加载（ML模型）';
+      mlBadge.className = 'status-badge status-on';
+    } else {
+      mlBadge.textContent = '启发式（未加载ML）';
+      mlBadge.className = 'status-badge status-off';
+    }
+
+    const llmBadge = document.getElementById('badgeLLM');
+    if (status.llm && status.llm.enabled) {
+      llmBadge.textContent = '已启用（' + status.llm.mode + '）';
+      llmBadge.className = 'status-badge status-on';
+    } else {
+      llmBadge.textContent = '未启用（模板模式）';
+      llmBadge.className = 'status-badge status-off';
+    }
+  } catch (err) {
+    showResult('configResult', '概览加载失败：' + err.message, 'error');
+  }
+}
+
+// ========== 配置管理 ==========
+async function loadConfig() {
+  try {
+    const cfg = await apiGet('/config');
+    document.getElementById('apiKey').value = cfg.llm_api_key_set ? '********' : '';
+    document.getElementById('modelName').value = cfg.llm_model || '';
+    document.getElementById('baseUrl').value = cfg.llm_base_url || '';
+    document.getElementById('aiMode').value = cfg.ai_mode || 'auto';
+    showResult('configResult',
+      `<span class="label">当前配置：</span>AI模式=${cfg.ai_mode}，模型=${cfg.llm_model}，` +
+      `Key=${cfg.llm_api_key_set ? '已设置 (' + cfg.llm_api_key_masked + ')' : '未设置'}，` +
+      `LLM=${cfg.llm_enabled ? '启用' : '未启用'}`, 'info');
+  } catch (err) {
+    showResult('configResult', '读取配置失败：' + err.message, 'error');
+  }
+}
+
+async function saveConfig() {
+  const apiKeyInput = document.getElementById('apiKey').value;
+  const body = {
+    ai_mode: document.getElementById('aiMode').value,
+    llm_model: document.getElementById('modelName').value,
+    llm_base_url: document.getElementById('baseUrl').value
+  };
+  // 只有用户修改了 Key（不是占位符 ********）才更新
+  if (apiKeyInput && apiKeyInput !== '********') {
+    body.llm_api_key = apiKeyInput;
+  }
+  try {
+    const cfg = await apiPost('/config', body);
+    showResult('configResult',
+      `<span class="label">保存成功！</span>AI模式=${cfg.ai_mode}，模型=${cfg.llm_model}，` +
+      `Key=${cfg.llm_api_key_set ? '已设置' : '未设置'}，LLM=${cfg.llm_enabled ? '启用' : '未启用'}` +
+      `<br><span class="muted">配置已写入 .env 文件，运行时立即生效，无需重启容器。</span>`, 'success');
+    loadOverview();
+  } catch (err) {
+    showResult('configResult', '保存失败：' + err.message, 'error');
+  }
+}
+
+async function testConnection() {
+  const apiKey = document.getElementById('apiKey').value;
+  if (!apiKey || apiKey === '********') {
+    showResult('configResult', '请先填写 API Key（读取当前配置后如需测试请重新输入Key）', 'warning');
+    return;
+  }
+  try {
+    const result = await apiPost('/config/test', {
+      api_key: apiKey,
+      base_url: document.getElementById('baseUrl').value,
+      model: document.getElementById('modelName').value
+    });
+    if (result.ok) {
+      showResult('configResult',
+        `<span class="label">连通成功！</span>模型=${result.model}，延迟=${result.latency_ms}ms，` +
+        `回复="${result.reply}"`, 'success');
+    } else {
+      showResult('configResult',
+        `<span class="label">连通失败：</span>${result.error}` +
+        (result.latency_ms ? `（耗时${result.latency_ms}ms）` : ''), 'error');
+    }
+  } catch (err) {
+    showResult('configResult', '测试请求失败：' + err.message, 'error');
+  }
+}
+
+// ========== 比赛下拉框 ==========
+async function loadMatchSelects() {
+  try {
+    const matches = await apiGet('/matches?limit=50');
+    const list = matches.matches || matches.data || matches;
+    const options = list.map(m =>
+      `<option value="${m.id}">${m.home_team_name || m.home_name} vs ${m.away_team_name || m.away_name}（${m.time || m.date || ''}）</option>`
+    ).join('');
+    document.getElementById('predictMatch').innerHTML = options;
+    document.getElementById('tacticsMatch').innerHTML = options;
+  } catch (err) {
+    console.error('加载比赛列表失败', err);
+  }
+}
+
+// ========== 比分预测测试 ==========
+async function testPredict() {
+  const matchId = document.getElementById('predictMatch').value;
+  if (!matchId) { showResult('predictResult', '请选择比赛', 'warning'); return; }
+  showResult('predictResult', '预测中...', 'info');
+  try {
+    const r = await apiGet('/ai/predict/' + matchId);
+    const probs = r.probabilities || {};
+    const homeP = Math.round((probs.home_win || 0) * 100);
+    const drawP = Math.round((probs.draw || 0) * 100);
+    const awayP = Math.round((probs.away_win || 0) * 100);
+    const score = r.predicted_score || {};
+    const modelLabel = r.model === 'ml_model'
+      ? '<span class="status-badge status-on">ML预训练模型</span>'
+      : '<span class="status-badge status-off">启发式估算</span>';
+
+    showResult('predictResult', `
+      <div style="margin-bottom:10px;"><strong>${r.home_team_name}</strong> vs <strong>${r.away_team_name}</strong></div>
+      <div class="prob-bar">
+        <div class="prob-home" style="width:${homeP}%">主胜 ${homeP}%</div>
+        <div class="prob-draw" style="width:${drawP}%">平 ${drawP}%</div>
+        <div class="prob-away" style="width:${awayP}%">客胜 ${awayP}%</div>
+      </div>
+      <div class="score-display">${score.home ?? '-'}<span class="vs">:</span>${score.away ?? '-'}</div>
+      <div style="text-align:center;">预测模型：${modelLabel}</div>
+      ${r.note ? `<div class="muted" style="margin-top:8px;">${r.note}</div>` : ''}
+    `, 'success');
+  } catch (err) {
+    showResult('predictResult', '预测失败：' + err.message, 'error');
+  }
+}
+
+// ========== 战术攻略测试 ==========
+async function testTactics() {
+  const matchId = document.getElementById('tacticsMatch').value;
+  if (!matchId) { showResult('tacticsResult', '请选择比赛', 'warning'); return; }
+  showResult('tacticsResult', '生成中...（首次调用大模型可能需要5-10秒）', 'info');
+  try {
+    const r = await apiGet('/ai/tactics/' + matchId);
+    const sourceLabel = r.source === 'llm'
+      ? '<span class="status-badge status-on">大模型生成</span>'
+      : '<span class="status-badge status-off">内置模板</span>';
+    let sectionsHtml = '';
+    if (r.sections) {
+      for (const [title, content] of Object.entries(r.sections)) {
+        sectionsHtml += `<div style="margin-top:10px;"><strong>${title}：</strong><br>${content.replace(/\n/g, '<br>')}</div>`;
+      }
+    }
+    showResult('tacticsResult', `
+      <div style="margin-bottom:8px;"><strong>${r.home_team_name}</strong> vs <strong>${r.away_team_name}</strong> 来源：${sourceLabel}</div>
+      <div style="margin-bottom:8px;"><strong>摘要：</strong>${r.summary || ''}</div>
+      ${sectionsHtml}
+    `, 'success');
+  } catch (err) {
+    showResult('tacticsResult', '生成失败：' + err.message, 'error');
+  }
+}
+
+// ========== 赛程解析测试 ==========
+async function testParse() {
+  const fileInput = document.getElementById('parseFile');
+  if (!fileInput.files || fileInput.files.length === 0) {
+    showResult('parseResult', '请选择赛程文件', 'warning');
+    return;
+  }
+  showResult('parseResult', '解析中...', 'info');
+  try {
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    const res = await fetch(API_BASE + '/ai/parse-schedule', { method: 'POST', body: formData });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+    const r = await res.json();
+    const sourceLabel = r.source === 'llm'
+      ? '<span class="status-badge status-on">大模型解析</span>'
+      : '<span class="status-badge status-off">规则解析</span>';
+    let matchesHtml = '';
+    if (r.matches && r.matches.length > 0) {
+      matchesHtml = r.matches.map((m, i) =>
+        `<div style="padding:8px 0;border-bottom:1px solid #e2e8f0;">` +
+        `<strong>${i + 1}. ${m.home || m.home_team} vs ${m.away || m.away_team}</strong>` +
+        `<br><span class="muted">时间：${m.time || ''} 地点：${m.venue || ''} 阶段：${m.stage || ''}</span>` +
+        `</div>`
+      ).join('');
+    } else {
+      matchesHtml = '<span class="muted">未解析到比赛</span>';
+    }
+    const warningsHtml = r.warnings && r.warnings.length > 0
+      ? `<div style="margin-top:10px;"><strong>警告：</strong>${r.warnings.join('；')}</div>` : '';
+    showResult('parseResult', `
+      <div style="margin-bottom:8px;">解析来源：${sourceLabel}，共解析到 ${r.matches ? r.matches.length : 0} 场比赛</div>
+      ${matchesHtml}
+      ${warningsHtml}
+    `, 'success');
+  } catch (err) {
+    showResult('parseResult', '解析失败：' + err.message, 'error');
+  }
+}
+
+// ========== 初始化 ==========
+loadOverview();
+loadMatchSelects();
+loadConfig();
+</script>
+</body>
+</html>
