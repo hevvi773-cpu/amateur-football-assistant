@@ -62,3 +62,6 @@ pnpm-lock.yaml
 
 # Agent files
 .agent/
+
+# Generated ML model (produced by football_ml_experiment.ipynb, not versioned)
+backend/models/
