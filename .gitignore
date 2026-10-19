@@ -27,6 +27,11 @@ venv/
 .coverage
 htmlcov/
 
+# ML model artifacts（由 train_model.py / notebook 训练生成，不入库）
+backend/models/*.pkl
+models/*.pkl
+*.pkl
+
 # Logs
 npm-debug.log*
 yarn-debug.log*

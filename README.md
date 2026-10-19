@@ -127,6 +127,8 @@ football-ai-assistant/
 | 概率校准 ECE（LR 留出） | 0.158 |
 
 > 数值均为本仓库 `football_ml_experiment.ipynb` 独立复现结果，与《赛事数据 ML 预测实验报告》原始口径一致（方向预测 80.6%）。报告原文的 76.4%/336 场/Brier 0.138 等为旧口径，以本 Notebook 复现值为准。
+>
+> ✅ **可复现状态**：`football_ml_experiment.ipynb` 已于 2026-10-19 在本地完整执行通过（`jupyter nbconvert --execute`），全部 cell 无报错，输出包含 14 种方法总览、2026 赛季留出验证（81.0%）与复现结论摘要，可直接查看执行结果；数据路径为仓库内相对路径，clone 后即可复跑。
 
 **实验方法的严谨性**：
 - 混淆矩阵 + McNemar 检验（方法间差异显著性，LR vs 规则 p=0.0077）
