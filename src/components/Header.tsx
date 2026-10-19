@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Home, Users, Calendar, User, Bell, ChevronDown, Shield, Crown, User as UserIcon, Eye, X } from 'lucide-react'
+import { Home, Users, Calendar, User, Bell, ChevronDown, Shield, Crown, User as UserIcon, Eye, X, Shirt, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -16,8 +16,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
 import { useApp, type UserRole } from '@/context/AppContext'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 function getNavItems(currentRole: string) {
@@ -38,14 +40,20 @@ const ROLE_OPTIONS: { value: UserRole; label: string; icon: typeof UserIcon; col
 ]
 
 export default function Header() {
-  const { currentRole, setCurrentRole, messages, unreadCount, markAllRead } = useApp()
+  const { currentRole, setCurrentRole, messages, unreadCount, markAllRead, dataSource, teams, currentTeamId, switchTeam } = useApp()
   const [msgOpen, setMsgOpen] = useState(false)
 
   const navItems = getNavItems(currentRole)
   const currentRoleOption = ROLE_OPTIONS.find((r) => r.value === currentRole) ?? ROLE_OPTIONS[0]
+  const currentTeam = teams.find((t) => t.id === currentTeamId)
 
   const handleRoleChange = (role: UserRole) => {
     setCurrentRole(role)
+  }
+
+  const handleTeamChange = (teamId: string, teamName: string) => {
+    switchTeam(teamId)
+    toast.success(`已切换所属球队：${teamName}`)
   }
 
   return (
@@ -87,6 +95,51 @@ export default function Header() {
 
         {/* 右侧：身份切换 + 消息 */}
         <div className="flex items-center gap-2">
+          {/* 数据源状态 */}
+          <Badge
+            variant="outline"
+            className={cn(
+              'hidden sm:inline-flex text-xs',
+              dataSource === 'api' ? 'border-green-300 text-green-700 bg-green-50' : 'border-amber-300 text-amber-700 bg-amber-50'
+            )}
+          >
+            {dataSource === 'api' ? '后端已连接' : '本地模拟数据'}
+          </Badge>
+
+          {/* 所属球队切换（全能账号） */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1.5 h-9 max-w-[180px]">
+                <Shirt className="size-4 text-primary" />
+                <span className="hidden md:inline text-sm truncate">{currentTeam?.name ?? currentTeamId}</span>
+                <ChevronDown className="size-3 text-muted-foreground shrink-0" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <div className="px-2 py-1.5 text-xs text-muted-foreground">切换所属球队（全能账号）</div>
+              <ScrollArea className="h-64">
+                {teams.map((team) => {
+                  const active = team.id === currentTeamId
+                  return (
+                    <DropdownMenuItem
+                      key={team.id}
+                      onClick={() => handleTeamChange(team.id, team.name)}
+                      className="cursor-pointer justify-between"
+                    >
+                      <span className="truncate text-sm">{team.name}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="text-[10px] px-1.5">
+                          {team.group}
+                        </Badge>
+                        {active && <Check className="size-3.5 text-primary" />}
+                      </div>
+                    </DropdownMenuItem>
+                  )
+                })}
+              </ScrollArea>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {/* 身份切换 */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

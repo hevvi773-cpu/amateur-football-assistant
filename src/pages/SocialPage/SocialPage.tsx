@@ -51,6 +51,7 @@ import {
 import { useApp } from '@/context/AppContext'
 import { ISocialEvent } from '@/data/social'
 import { IArticle, IComment } from '@/data/articles'
+import * as api from '@/lib/api'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Image } from '@/components/ui/image'
@@ -92,7 +93,7 @@ export default function SocialPage() {
 
 // 约球接龙列表
 function SocialEventList() {
-  const { socialEvents, setSocialEvents, currentPlayerId, players, addMessage, messages } = useApp()
+  const { socialEvents, setSocialEvents, currentPlayerId, players, addMessage, messages, dataSource, refreshAll } = useApp()
   const [createOpen, setCreateOpen] = useState(false)
   const [detailEvent, setDetailEvent] = useState<ISocialEvent | null>(null)
 
@@ -111,10 +112,22 @@ function SocialEventList() {
   const activeEvents = socialEvents.filter((e) => e.status === 'recruiting')
   const otherEvents = socialEvents.filter((e) => e.status !== 'recruiting')
 
-  const handleJoin = (eventId: string) => {
+  const handleJoin = async (eventId: string) => {
     const ev = socialEvents.find((e) => e.id === eventId)
     if (!ev) return
     if (ev.currentPlayers.includes(currentPlayerId)) return
+
+    if (dataSource === 'api') {
+      try {
+        await api.signupSocialEvent(eventId)
+        toast.success('报名成功')
+        refreshAll()
+        return
+      } catch (err) {
+        toast.error(`报名失败：${(err as Error).message}`)
+        return
+      }
+    }
 
     const updated = socialEvents.map((e) =>
       e.id === eventId
@@ -124,7 +137,7 @@ function SocialEventList() {
     setSocialEvents(updated)
     toast.success('报名成功')
 
-    // 人数达标检测
+    // 人数达标检测（本地兜底模式）
     const after = updated.find((e) => e.id === eventId)!
     if (after.currentPlayers.length >= after.minPlayers && ev.currentPlayers.length < ev.minPlayers) {
       addMessage({
@@ -136,7 +149,19 @@ function SocialEventList() {
     }
   }
 
-  const handleLeave = (eventId: string) => {
+  const handleLeave = async (eventId: string) => {
+    if (dataSource === 'api') {
+      try {
+        await api.cancelSignupEvent(eventId)
+        toast.success('已取消报名')
+        refreshAll()
+        return
+      } catch (err) {
+        toast.error(`取消失败：${(err as Error).message}`)
+        return
+      }
+    }
+
     const updated = socialEvents.map((e) =>
       e.id === eventId
         ? { ...e, currentPlayers: e.currentPlayers.filter((id) => id !== currentPlayerId) }
@@ -146,13 +171,36 @@ function SocialEventList() {
     toast.success('已取消报名')
   }
 
-  const simulateDeadline = () => {
-    // 模拟时间推进：检查招募中的接龙，人数不足的取消
+  const simulateDeadline = async () => {
+    if (dataSource === 'api') {
+      const recruiting = socialEvents.filter((e) => e.status === 'recruiting')
+      if (recruiting.length === 0) {
+        toast.info('当前没有招募中的接龙')
+        return
+      }
+      let cancelledCount = 0
+      for (const event of recruiting) {
+        try {
+          const updated = (await api.simulateEventDeadline(event.id)) as { status?: string }
+          if (updated.status === 'cancelled') cancelledCount++
+        } catch {
+          // 单个失败不阻断其余
+        }
+      }
+      refreshAll()
+      if (cancelledCount > 0) {
+        toast.warning(`${cancelledCount}个接龙因人数不足已取消`)
+      } else {
+        toast.success('所有招募中接龙均已达标')
+      }
+      return
+    }
+
+    // 本地兜底模式
     let cancelledCount = 0
     const updated = socialEvents.map((e) => {
       if (e.status === 'recruiting' && e.currentPlayers.length < e.minPlayers) {
         cancelledCount++
-        // 持续推送通知
         addMessage({
           type: 'social',
           title: '约球人数不足',
@@ -171,11 +219,34 @@ function SocialEventList() {
     }
   }
 
-  const createEvent = () => {
+  const createEvent = async () => {
     if (!form.title || !form.time || !form.venue) {
       toast.error('请填写完整信息')
       return
     }
+    const payload = {
+      title: form.title,
+      type: form.type,
+      time: form.time,
+      venue: form.venue,
+      min_players: parseInt(form.minPlayers) || 6,
+      deadline: form.deadline || form.time,
+      description: form.description,
+    }
+    if (dataSource === 'api') {
+      try {
+        await api.createSocialEvent(payload)
+        refreshAll()
+        setCreateOpen(false)
+        setForm({ title: '', type: 'football', time: '', venue: '', minPlayers: '6', deadline: '', description: '' })
+        toast.success('接龙已发布')
+        return
+      } catch (err) {
+        toast.error(`发布失败：${(err as Error).message}`)
+        return
+      }
+    }
+
     const newEvent: ISocialEvent = {
       id: `s_${Date.now()}`,
       title: form.title,
@@ -350,10 +421,10 @@ function SocialEventList() {
                 <Label className="text-xs mb-2 block">报名人员 ({detailEvent.currentPlayers.length})</Label>
                 <div className="flex flex-wrap gap-2">
                   {detailEvent.currentPlayers.map((pid) => {
-                    const p = players.find((x) => x.id === pid)
+                    const player = players.find((item) => item.id === pid)
                     return (
                       <Badge key={pid} variant="outline" className="gap-1">
-                        {p ? p.name : pid}
+                        {player ? player.name : pid}
                       </Badge>
                     )
                   })}
@@ -536,13 +607,26 @@ function ArticleSideList() {
 }
 
 function ArticleDetailContent({ article }: { article: IArticle }) {
-  const { articles, setArticles, currentPlayerId, players } = useApp()
+  const { articles, setArticles, currentPlayerId, players, dataSource, refreshAll } = useApp()
   const [commentText, setCommentText] = useState('')
 
   const myName = players.find((p) => p.id === currentPlayerId)?.name || '匿名用户'
 
-  const submitComment = () => {
+  const submitComment = async () => {
     if (!commentText.trim()) return
+    if (dataSource === 'api') {
+      try {
+        await api.addArticleComment(article.id, myName, commentText)
+        refreshAll()
+        setCommentText('')
+        toast.success('评论成功')
+        return
+      } catch (err) {
+        toast.error(`评论失败：${(err as Error).message}`)
+        return
+      }
+    }
+
     const newComment: IComment = {
       id: `c_${Date.now()}`,
       articleId: article.id,

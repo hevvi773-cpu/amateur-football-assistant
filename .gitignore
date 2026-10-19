@@ -65,3 +65,18 @@ pnpm-lock.yaml
 
 # Generated ML model (produced by football_ml_experiment.ipynb, not versioned)
 backend/models/
+
+# 环境配置（含密钥，切勿提交）
+.env
+backend/.env
+
+# Python 本地环境与缓存
+.venv/
+backend/.venv/
+.pytest_cache/
+__pycache__/
+*.pyc
+
+# 本地数据库（由 backend/scripts/import_season_records.py 重新生成）
+backend/data/*.db
+backend/data/*.bak_*

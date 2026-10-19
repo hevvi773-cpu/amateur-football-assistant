@@ -8,6 +8,8 @@ export interface ILineupSlot {
 }
 
 export interface ILineup {
+  /** 后端阵容记录ID（API 模式下存在，用于发布） */
+  id?: string
   matchId: string
   formation: string
   slots: ILineupSlot[]
@@ -108,10 +110,3 @@ export const FORMATION_DEFS: IFormationDef[] = [
   { key: '5-3-2', label: '5-3-2', slots: FORMATION_532 },
 ]
 
-export const MOCK_LINEUP: ILineup = {
-  matchId: 'm2',
-  formation: '4-3-3',
-  slots: DEFAULT_433_SLOTS,
-  substitutes: ['11'],
-  status: 'published',
-}

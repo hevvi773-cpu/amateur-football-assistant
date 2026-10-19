@@ -18,16 +18,39 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Lock, Shield, AlertTriangle, Sparkles, Crown, Plus, X, ChevronDown, ChevronUp, Info } from 'lucide-react'
+import { Lock, Shield, AlertTriangle, Sparkles, Crown, Plus, X, ChevronDown, ChevronUp, Info, CalendarDays } from 'lucide-react'
 import { useApp, getPlayerName } from '@/context/AppContext'
-import { FORMATION_DEFS, ILineupSlot } from '@/data/lineup'
+import { FORMATION_DEFS, ILineup, ILineupSlot } from '@/data/lineup'
+import * as api from '@/lib/api'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import AssociationPanel from './AssociationPanel'
 
 export default function LineupPage() {
-  const { currentRole, lineup, setLineup, players, addMessage } = useApp()
+  const { currentRole, lineup, setLineup, players, addMessage, dataSource, currentTeamId, teams, activeLineupMatchId } = useApp()
   const isCaptain = currentRole === 'captain'
+  const currentTeamName = teams.find((t) => t.id === currentTeamId)?.name ?? currentTeamId
+
+  // 保存草稿到后端（本地先更新，后端失败时提示）
+  const applyLineup = (next: ILineup) => {
+    setLineup(next)
+    if (dataSource !== 'api') return
+    api
+      .saveLineup({
+        match_id: lineup.matchId,
+        team_id: currentTeamId,
+        formation: next.formation,
+        slots: next.slots.map((slot) => ({
+          position: slot.position,
+          posLabel: slot.posLabel,
+          row: slot.row,
+          col: slot.col,
+          playerId: slot.playerId,
+        })),
+        substitutes: next.substitutes,
+      })
+      .catch(() => toast.error('阵容保存失败，请检查后端服务'))
+  }
 
   const healthLabel: Record<string, string> = {
     healthy: '健康',
@@ -76,14 +99,14 @@ export default function LineupPage() {
 
     // 从替补席补充剩余空位（如果有的话）
     let subIdx = 0
-    for (let i = 0; i < newSlots.length; i++) {
-      if (!newSlots[i].playerId && subIdx < lineup.substitutes.length) {
-        newSlots[i].playerId = lineup.substitutes[subIdx]
+    for (let slotIdx = 0; slotIdx < newSlots.length; slotIdx++) {
+      if (!newSlots[slotIdx].playerId && subIdx < lineup.substitutes.length) {
+        newSlots[slotIdx].playerId = lineup.substitutes[subIdx]
         subIdx++
       }
     }
 
-    setLineup({
+    applyLineup({
       ...lineup,
       formation: newFormation,
       slots: newSlots,
@@ -96,61 +119,84 @@ export default function LineupPage() {
   // 一键AI推荐阵容
   const handleAIRecommend = async () => {
     setAiLoading(true)
-    await new Promise((r) => setTimeout(r, 1500))
+    try {
+      let recommended: { formation: string; slots: ILineupSlot[]; substitutes: string[]; reasons?: Record<string, string> } | null = null
 
-    // AI智能分配：按位置类型匹配球员
-    const forwards = players.filter((p) => p.position === '前锋' && !p.isSuspended)
-    const midfielders = players.filter((p) => p.position === '中场' && !p.isSuspended)
-    const defenders = players.filter((p) => p.position === '后卫' && !p.isSuspended)
-    const goalkeepers = players.filter((p) => p.position === '门将' && !p.isSuspended)
-
-    const def = currentFormation
-    const usedIds = new Set<string>()
-    const newSlots: ILineupSlot[] = def.slots.map((slotDef) => {
-      const s: ILineupSlot = { ...slotDef, playerId: undefined }
-      let pool: typeof players
-
-      if (slotDef.position === 'GK') {
-        pool = goalkeepers
-      } else if (slotDef.row >= 3) {
-        pool = defenders
-      } else if (slotDef.row >= 2) {
-        pool = midfielders
+      if (dataSource === 'api') {
+        const data = (await api.recommendLineup({
+          match_id: lineup.matchId,
+          team_id: currentTeamId,
+          formation: currentFormation.key,
+        })) as { formation: string; slots: ILineupSlot[]; substitutes: string[]; reasons?: Record<string, string> }
+        recommended = data
       } else {
-        pool = forwards
+        // 本地兜底：按位置类型匹配球员
+        const forwards = players.filter((p) => p.position === '前锋' && !p.isSuspended)
+        const midfielders = players.filter((p) => p.position === '中场' && !p.isSuspended)
+        const defenders = players.filter((p) => p.position === '后卫' && !p.isSuspended)
+        const goalkeepers = players.filter((p) => p.position === '门将' && !p.isSuspended)
+
+        const def = currentFormation
+        const usedIds = new Set<string>()
+        const newSlots: ILineupSlot[] = def.slots.map((slotDef) => {
+          const s: ILineupSlot = { ...slotDef, playerId: undefined }
+          let pool: typeof players
+
+          if (slotDef.position === 'GK') {
+            pool = goalkeepers
+          } else if (slotDef.row >= 3) {
+            pool = defenders
+          } else if (slotDef.row >= 2) {
+            pool = midfielders
+          } else {
+            pool = forwards
+          }
+
+          const healthOrder: Record<string, number> = { healthy: 0, tired: 1, minor_injury: 2, injured: 3 }
+          const sorted = pool
+            .filter((p) => !usedIds.has(p.id))
+            .sort((a, b) => (healthOrder[a.healthStatus] ?? 9) - (healthOrder[b.healthStatus] ?? 9))
+
+          if (sorted.length > 0) {
+            s.playerId = sorted[0].id
+            usedIds.add(sorted[0].id)
+          }
+
+          return s
+        })
+
+        recommended = {
+          formation: def.key,
+          slots: newSlots,
+          substitutes: players
+            .filter((p) => !newSlots.some((s) => s.playerId === p.id) && !p.isSuspended)
+            .slice(0, 5)
+            .map((p) => p.id),
+          reasons: undefined,
+        }
       }
 
-      // 选一个健康状态好的
-      const healthOrder: Record<string, number> = { healthy: 0, tired: 1, minor_injury: 2, injured: 3 }
-      const sorted = pool
-        .filter((p) => !usedIds.has(p.id))
-        .sort((a, b) => (healthOrder[a.healthStatus] ?? 9) - (healthOrder[b.healthStatus] ?? 9))
+      applyLineup({
+        ...lineup,
+        formation: recommended.formation,
+        slots: recommended.slots,
+        substitutes: recommended.substitutes,
+      })
 
-      if (sorted.length > 0) {
-        s.playerId = sorted[0].id
-        usedIds.add(sorted[0].id)
-      }
+      // 推荐理由：后端优先，本地模板兜底
+      let reasonText = ''
+      if (recommended.reasons && Object.keys(recommended.reasons).length > 0) {
+        reasonText = Object.entries(recommended.reasons)
+          .map(([k, v]) => `${k}\n${v}`)
+          .join('\n\n')
+      } else {
+        reasonText = `【AI推荐阵容说明】
 
-      return s
-    })
-
-    setLineup({
-      ...lineup,
-      slots: newSlots,
-      substitutes: players
-        .filter((p) => !newSlots.some((s) => s.playerId === p.id) && !p.isSuspended)
-        .slice(0, 5)
-        .map((p) => p.id),
-    })
-
-    // 生成AI推荐理由
-    const reasonText = `【AI推荐阵容说明】
-
-阵型选择：${def.label}
+阵型选择：${currentFormation.label}
 
 一、阵型选择依据
 
-  基于当前对手的战术风格和我方球员特点，推荐使用 ${def.label} 阵型。该阵型攻守平衡，能够充分发挥边路进攻优势，同时保证中场控制力。
+  基于当前对手的战术风格和我方球员特点，推荐使用 ${currentFormation.label} 阵型。该阵型攻守平衡，能够充分发挥边路进攻优势，同时保证中场控制力。
 
 二、各位置人选依据
 
@@ -181,11 +227,15 @@ export default function LineupPage() {
 • 疲劳球员适当调整出场时间
 
 * 以上推荐由AI综合分析生成，仅供队长参考，最终排兵布阵请结合实际情况决定。`
-    setAiReason(reasonText)
-    setShowAiReason(true)
-
-    setAiLoading(false)
-    toast.success('AI推荐阵容已应用')
+      }
+      setAiReason(reasonText)
+      setShowAiReason(true)
+      toast.success('AI推荐阵容已应用')
+    } catch (err) {
+      toast.error(`AI推荐失败：${(err as Error).message}`)
+    } finally {
+      setAiLoading(false)
+    }
   }
 
   // 发布阵容
@@ -194,6 +244,17 @@ export default function LineupPage() {
     if (filled < 11) {
       toast.warning('首发阵容未填满，至少需要11人')
       return
+    }
+    if (dataSource === 'api' && lineup.id) {
+      try {
+        await api.publishLineup(lineup.id)
+        setLineup({ ...lineup, status: 'published' })
+        toast.success('阵容已发布，已推送通知给队员')
+        return
+      } catch (err) {
+        toast.error(`发布失败：${(err as Error).message}`)
+        return
+      }
     }
     await new Promise((r) => setTimeout(r, 500))
     setLineup({ ...lineup, status: 'published' })
@@ -219,7 +280,7 @@ export default function LineupPage() {
     } else {
       // 原球员回替补
       if (prevPlayerId && !lineup.substitutes.includes(prevPlayerId)) {
-        setLineup({
+        applyLineup({
           ...lineup,
           slots: newSlots.map((s, i) =>
             i === editingSlot ? { ...s, playerId } : s
@@ -232,7 +293,7 @@ export default function LineupPage() {
     }
 
     newSlots[editingSlot] = { ...newSlots[editingSlot], playerId }
-    setLineup({ ...lineup, slots: newSlots })
+    applyLineup({ ...lineup, slots: newSlots })
     setEditingSlot(null)
   }
 
@@ -244,16 +305,42 @@ export default function LineupPage() {
     newSlots[editingSlot].playerId = undefined
 
     const newSubs = removedId ? [...lineup.substitutes, removedId] : lineup.substitutes
-    setLineup({ ...lineup, slots: newSlots, substitutes: newSubs })
+    applyLineup({ ...lineup, slots: newSlots, substitutes: newSubs })
     setEditingSlot(null)
   }
 
   const filledCount = lineup.slots.filter((s) => s.playerId).length
   const suspendedCount = lineup.slots.filter((s) => {
     if (!s.playerId) return false
-    const p = players.find((pl) => pl.id === s.playerId)
-    return p?.isSuspended
+    const player = players.find((item) => item.id === s.playerId)
+    return player?.isSuspended
   }).length
+
+  // 该队没有未开赛/进行中的比赛时，阵容区显示空态（协会身份已在上方提前返回）
+  if (!activeLineupMatchId) {
+    return (
+      <div className="min-h-screen">
+        <main className="py-8">
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <div className="mb-6">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">出场阵容</h1>
+              <p className="text-muted-foreground text-sm mt-1">
+                {isCaptain ? '编排首发阵容，调整替补席' : '查看本场比赛出场安排'}
+              </p>
+            </div>
+            <Card className="border-dashed">
+              <CardContent className="py-16 flex flex-col items-center text-center">
+                <CalendarDays className="size-10 text-muted-foreground mb-3" />
+                <p className="text-foreground font-medium">「{currentTeamName}」暂无待排阵容</p>
+                <p className="text-sm text-muted-foreground mt-1">该队没有未开赛或进行中的比赛，阵容功能仅在赛前可用</p>
+                <p className="text-xs text-muted-foreground mt-3">可在顶栏切换所属球队，查看其他球队的阵容</p>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen">
@@ -295,7 +382,7 @@ export default function LineupPage() {
                   {lineup.status !== 'published' ? (
                     <Button size="sm" onClick={handlePublish}>发布阵容</Button>
                   ) : (
-                    <Button size="sm" variant="secondary" onClick={() => setLineup({ ...lineup, status: 'draft' })}>
+                    <Button size="sm" variant="secondary" onClick={() => applyLineup({ ...lineup, status: 'draft' })}>
                       取消发布
                     </Button>
                   )}
@@ -454,15 +541,15 @@ export default function LineupPage() {
                         <p className="text-sm text-muted-foreground">暂无替补球员</p>
                       ) : (
                         lineup.substitutes.map((pid) => {
-                          const p = players.find((pl) => pl.id === pid)
-                          if (!p) return null
+                          const player = players.find((item) => item.id === pid)
+                          if (!player) return null
                           return (
                             <div
                               key={pid}
                               className={cn(
                                 'flex items-center gap-2 px-2.5 py-1.5 rounded-md border text-sm',
                                 isCaptain && 'hover:bg-muted cursor-pointer',
-                                p.isSuspended && 'opacity-60'
+                                player.isSuspended && 'opacity-60'
                               )}
                               onClick={() => {
                                 if (!isCaptain) return
@@ -474,19 +561,19 @@ export default function LineupPage() {
                                 }
                                 const newSlots = [...lineup.slots]
                                 newSlots[emptyIdx].playerId = pid
-                                setLineup({
+                                applyLineup({
                                   ...lineup,
                                   slots: newSlots,
-                                  substitutes: lineup.substitutes.filter((x) => x !== pid),
+                                  substitutes: lineup.substitutes.filter((item) => item !== pid),
                                 })
                               }}
                             >
                               <span className="size-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
-                                {p.number}
+                                {player.number}
                               </span>
-                              <span className="font-medium">{p.name}</span>
-                              <Badge variant="outline" className="text-[10px] h-5 px-1.5">{p.position}</Badge>
-                              {p.isSuspended && <Badge variant="destructive" className="text-[10px] h-5">停赛</Badge>}
+                              <span className="font-medium">{player.name}</span>
+                              <Badge variant="outline" className="text-[10px] h-5 px-1.5">{player.position}</Badge>
+                              {player.isSuspended && <Badge variant="destructive" className="text-[10px] h-5">停赛</Badge>}
                             </div>
                           )
                         })

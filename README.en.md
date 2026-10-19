@@ -65,30 +65,48 @@ One account can hold different roles across multiple teams. Role switching chang
 | Forms | react-hook-form + zod | 7.72 / 4.3 |
 | Icons | lucide-react | 0.577 |
 
-### Backend (designed, not included in code package)
+### Backend (shipped with this repo, FastAPI)
 
-- FastAPI + uvicorn (port 8000)
-- SQLite (lightweight, suitable for single-league scenarios)
-- ML model: `prediction_model.pkl` (scikit-learn)
+- FastAPI + uvicorn (port 8000), entrypoint `backend/run.py`, app object `backend/app/main.py`
+- SQLite: `backend/data/football.db` (427 real match records, imported via `backend/scripts/import_season_records.py`)
+- Score prediction: `backend/app/services/prediction.py` — a three-class Softmax regression (`backend/app/services/softmax_model.py`, pure-Python, zero extra dependencies). Model file `backend/models/prediction_model.pkl` is produced by `backend/scripts/train_model.py`; when missing or when inference fails it falls back to a heuristic (points / goal difference / home advantage / suspensions)
+- Identity is simulated via request headers `X-User-Id` / `X-User-Role` (no auth system in this prototype)
+- Tests: `backend/tests/` (pytest)
+- LLM config: `backend/.env` (`AI_MODE` / `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`); AI generation features degrade to built-in templates when unset
 
 ### Project Structure
 
 ```
-src/
-├── app.tsx              # App entry & routing
-├── components/          # Shared components
-│   ├── Header.tsx
-│   ├── Layout.tsx
-│   └── ui/              # shadcn/ui components (30+)
-├── pages/               # Four main pages
-│   ├── Home/            # Home (fixtures, league table, AI prediction)
-│   ├── Lineup/          # Lineup / Match Management (admin role)
-│   ├── Social/          # Meetups
-│   └── Profile/         # Profile (role switch, fitness, post-match thoughts)
-└── ...
+football-ai-assistant/
+├── src/                        # Frontend (React 19 + TS + Tailwind 4 + shadcn/ui)
+│   ├── app.tsx                 # Routes
+│   ├── components/             # Shared components (Header / Layout / ui)
+│   ├── pages/                  # Four main pages
+│   │   ├── HomePage/           # Fixtures, league table, AI prediction
+│   │   ├── LineupPage/         # Lineup / Match Management (association role)
+│   │   ├── SocialPage/         # Meetups
+│   │   └── ProfilePage/        # Profile
+│   ├── lib/
+│   │   ├── api.ts              # Backend API client (single data entry point)
+│   │   └── mappers.ts          # snake_case -> frontend type mapping
+│   └── data/                   # Type definitions & fallback data
+├── backend/
+│   ├── app/
+│   │   ├── routers/            # 10 route modules (ai / matches / lineup / social ...)
+│   │   ├── services/           # Business services (prediction / generators / llm ...)
+│   │   ├── models.py           # SQLAlchemy models
+│   │   └── schemas.py          # Pydantic request/response schemas
+│   ├── scripts/                # Training & data import scripts
+│   ├── tests/                  # pytest smoke tests
+│   ├── data/                   # SQLite database (not versioned)
+│   └── models/                 # Trained pkl artifacts (not versioned)
+├── docs/                       # PRD, ML experiment report, design diagrams
+├── football_ml_experiment.ipynb# Reproducible ML experiment notebook
+├── docker-compose.yml          # One-command Docker deploy (frontend 8080 / backend 8000)
+├── Dockerfile.frontend         # Frontend multi-stage image (Vite build + nginx proxy)
+├── Dockerfile.backend          # Backend image
+└── nginx.conf                  # nginx reverse proxy & SPA fallback config
 ```
-
-124 files total, 80+ source files.
 
 ---
 
@@ -125,33 +143,48 @@ The match prediction model was trained and evaluated in a rigorous standalone ex
 
 ### Prerequisites
 
-- Node.js ≥ 18
-- npm / pnpm / yarn
+- Node.js ≥ 18, npm
+- Python ≥ 3.11 (backend)
+- Or Docker + Docker Compose
 
-### Install & Run
+### Option 1: Docker one-command deploy (recommended)
 
 ```bash
-# Install dependencies
-npm install
+# Configure the LLM (optional; without it AI generation falls back to built-in templates)
+cp .env.example .env   # edit .env and fill in LLM_API_KEY etc.
 
-# Development mode
-npm run dev
-
-# Build
-npm run build
-
-# Preview build
-npm run preview
+docker compose up -d
 ```
+
+Open <http://localhost:8080>. nginx reverse-proxies `/api` to the backend container, so the frontend never needs the backend address.
+
+### Option 2: Local frontend/backend split
+
+```bash
+# --- Backend (port 8000) ---
+cd backend
+python -m venv .venv
+.venv\Scripts\activate          # Windows; macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env            # optional, LLM config
+python run.py
+
+# --- Frontend (port 8001) ---
+npm install
+npm run dev:win
+```
+
+> ⚠️ **Known issue**: `API_BASE` in `src/lib/api.ts` is hardcoded to `http://localhost:8010/api`. That value is only rewritten to the relative path `/api` during the Docker build by `Dockerfile.frontend`. In local split development the frontend will call port 8010 while the backend actually listens on 8000 — you need to add a `server.proxy` entry in `vite.config.ts` forwarding `/api` to `http://localhost:8000`, or make `API_BASE` read from an env var. Not yet fixed.
 
 ### Environment Variables
 
-AI capabilities require an LLM API key (optional — falls back to mock data when not configured):
+Backend AI config (`backend/.env`, optional; degrades to mock / built-in templates when unset):
 
 ```
-# .env
-VITE_LLM_API_KEY=your_api_key_here
-VITE_LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+AI_MODE=auto
+LLM_API_KEY=your_api_key_here
+LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+LLM_MODEL=qwen-plus
 ```
 
 > Without an API key, AI generation capabilities return mock data. Core business features are unaffected.
@@ -173,12 +206,13 @@ VITE_LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 
 This is a course design project. Current status:
 
-- ✅ Frontend four pages implemented (React + TS, 124 files)
-- ✅ PRD V1.1 complete (To-be design doc, under review)
-- ✅ ML prediction model experiment complete (standalone report)
-- 🚧 Backend (FastAPI) is in design phase, code not included in deliverables
-- 🚧 AI generation capabilities are partially mock / frontend templates, not connected to real LLM
-- 🚧 Match prediction ML model is trained but not integrated into the frontend
+- ✅ Frontend four pages implemented (React 19 + TS, all data fetched from the backend via `lib/api.ts`)
+- ✅ Backend FastAPI fully shipped: 10 route modules, three-role permissions, SQLite with real match data, pytest smoke tests
+- ✅ Docker one-command deploy (frontend nginx on 8080 with reverse proxy / backend on 8000)
+- ✅ Score prediction uses an in-house Softmax regression trained by `backend/scripts/train_model.py`, not an LLM
+- 🚧 AI generation features (tactics / lineup recommendation / post-match review) fall back to built-in templates when no API key is configured; switch to a real LLM once configured
+- 🚧 `prediction_model.pkl` is not versioned — after cloning, run `cd backend && python scripts/train_model.py` to produce a local model, otherwise the heuristic fallback is used
+- 🚧 In local split development the frontend API base URL and backend port are inconsistent (see the known issue under Quick Start)
 
 > The core value of this project lies in: complete product design thinking (PRD + three-role permissions + AI-First architecture) + rigorous ML experiment methodology (14-method comparison + honest limitation analysis), rather than full production deployment.
 

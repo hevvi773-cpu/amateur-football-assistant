@@ -23,26 +23,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Sparkles, Trophy, Clock, MapPin, Zap, FileText, Crown, User, Lock, Swords, ChevronDown, ChevronUp, CalendarDays } from 'lucide-react'
 import { useApp, getTeamName } from '@/context/AppContext'
 import { IMatch } from '@/data/matches'
+import * as api from '@/lib/api'
+import ExpandableMatchList from './ExpandableMatchList'
+import { extractSummary } from './MatchCard'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-
-const MY_TEAM_ID = 't1' // 南宁联队
-
-const STATUS_LABEL: Record<string, { label: string; className: string }> = {
-  upcoming: { label: '未开赛', className: 'bg-blue-100 text-blue-700 border-blue-200' },
-  ongoing: { label: '进行中', className: 'bg-green-100 text-green-700 border-green-200 animate-pulse' },
-  finished: { label: '已结束', className: 'bg-muted text-muted-foreground border-border' },
-}
-
-// 生成简短摘要（取内容前几句）
-function extractSummary(full: string, maxLen = 80): string {
-  const lines = full
-    .split('\n')
-    .filter((l) => l.trim() && !l.startsWith('【') && !l.startsWith('—') && !l.startsWith('━') && !l.startsWith('一、') && !l.startsWith('二、') && !l.startsWith('三、') && !l.startsWith('四、') && !l.startsWith('五、') && !/^[0-9]+\./.test(l.trim()))
-    .slice(0, 2)
-  const joined = lines.join(' ').replace(/^[• ]+/, '').trim()
-  return joined.length > maxLen ? joined.slice(0, maxLen) + '…' : joined
-}
 
 // 生成AI赛前战术攻略内容
 function buildTacticContent(match: IMatch, teams: { id: string; name: string; group: string; played: number; won: number; drawn: number; lost: number; goalsFor: number; goalsAgainst: number; goalDifference: number; points: number; logoUrl: string }[]): string {
@@ -160,7 +145,7 @@ function buildTeamSummary(reviews: { authorRole: string }[]): string {
 }
 
 export default function HomePage() {
-  const { matches, teams, reviews, players, isTeamMember, currentRole, setReviews, currentPlayerId, addMessage } = useApp()
+  const { matches, teams, reviews, players, isTeamMember, currentTeamId } = useApp()
   const [stageFilter, setStageFilter] = useState('all')
   const [aiContent, setAiContent] = useState<{ matchId: string; type: 'prediction' | 'preview'; content: string } | null>(null)
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
@@ -168,33 +153,13 @@ export default function HomePage() {
   const [submitting, setSubmitting] = useState(false)
   const [summaryExpanded, setSummaryExpanded] = useState(false)
 
-  // 每场上AI赛前战术攻略 - 默认已生成
+  // 每场上AI赛前战术攻略 - 优先调后端接口，失败时用本地模板兜底
   const [tacticContents, setTacticContents] = useState<Record<string, string>>({})
   const [tacticExpanded, setTacticExpanded] = useState<Record<string, boolean>>({})
 
-  // 全队AI总结内容 - 默认已生成
-  const teamSummaryContent = useMemo(() => {
-    if (reviews.length === 0) return ''
-    return buildTeamSummary(reviews)
-  }, [reviews])
+  // 全队AI总结 - 优先调后端 review-summary 接口，失败时本地兜底
+  const [teamSummaryContent, setTeamSummaryContent] = useState('')
 
-  const filteredMatches = useMemo(() => {
-    return matches.filter((m) => stageFilter === 'all' || m.stage === stageFilter)
-  }, [matches, stageFilter])
-
-  const myTeamMatches = useMemo(() => {
-    return matches.filter((m) => m.homeTeamId === MY_TEAM_ID || m.awayTeamId === MY_TEAM_ID)
-  }, [matches])
-
-  const groupA = teams.filter((t) => t.group === 'A组').sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference)
-  const groupB = teams.filter((t) => t.group === 'B组').sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference)
-
-  const getPlayerNameById = (pid: string) => {
-    const p = players.find((x) => x.id === pid || `p${x.id}` === pid)
-    return p?.name || pid
-  }
-
-  // 进入页面后自动为未开赛赛程生成AI战术攻略
   useEffect(() => {
     const upcoming = matches.filter((m) => m.status === 'upcoming')
     const contents: Record<string, string> = {}
@@ -202,45 +167,138 @@ export default function HomePage() {
       contents[m.id] = buildTacticContent(m, teams)
     })
     setTacticContents(contents)
+
+    // 后端可达时，用真实 AI 攻略覆盖本地模板
+    if (upcoming.length > 0) {
+      Promise.allSettled(
+        upcoming.map((m) => api.fetchTactics(m.id))
+      ).then((results) => {
+        const updated: Record<string, string> = { ...contents }
+        results.forEach((result, idx) => {
+          if (result.status === 'fulfilled') {
+            const data = result.value as { summary?: string; sections?: Record<string, string> }
+            const sectionText = data.sections ? Object.entries(data.sections).map(([k, v]) => `${k}\n${v}`).join('\n\n') : ''
+            updated[upcoming[idx].id] = `${data.summary ?? ''}${sectionText ? `\n\n${sectionText}` : ''}`
+          }
+        })
+        setTacticContents(updated)
+      })
+    }
   }, [matches, teams])
 
-  // 模拟AI生成（预测/旧攻略弹窗）
+  // 本队最近一场已结束比赛（感想归属），无则复盘区显示空态
+  const myFinishedMatch = useMemo(() => {
+    return matches
+      .filter((m) => (m.homeTeamId === currentTeamId || m.awayTeamId === currentTeamId) && m.status === 'finished')
+      .sort((a, b) => b.time.localeCompare(a.time))[0]
+  }, [matches, currentTeamId])
+
+  // 仅展示当前所属球队最近一场已结束比赛的赛后感想
+  const myMatchReviews = useMemo(() => {
+    if (!myFinishedMatch) return []
+    return reviews.filter((r) => r.matchId === myFinishedMatch.id)
+  }, [reviews, myFinishedMatch])
+
+  // 全队赛后感想AI总结
+  useEffect(() => {
+    if (myMatchReviews.length === 0 || !myFinishedMatch) {
+      setTeamSummaryContent('')
+      return
+    }
+    setTeamSummaryContent(buildTeamSummary(myMatchReviews))
+    api
+      .fetchReviewSummary(myFinishedMatch.id)
+      .then((data) => {
+        const summary = (data as { summary?: string }).summary
+        if (summary) setTeamSummaryContent(summary)
+      })
+      .catch(() => undefined)
+  }, [myMatchReviews, myFinishedMatch])
+
+  // 赛程排序：未开赛/进行中在前，已结束按时间倒序（最新在前）
+  const sortMatches = (list: IMatch[]) => {
+    const statusOrder: Record<string, number> = { upcoming: 0, ongoing: 1, finished: 2 }
+    return [...list].sort((a, b) => {
+      const sa = statusOrder[a.status] ?? 3
+      const sb = statusOrder[b.status] ?? 3
+      if (sa !== sb) return sa - sb
+      return b.time.localeCompare(a.time)
+    })
+  }
+
+  const filteredMatches = useMemo(() => {
+    return sortMatches(matches.filter((m) => stageFilter === 'all' || m.stage === stageFilter))
+  }, [matches, stageFilter])
+
+  const myTeamMatches = useMemo(() => {
+    return sortMatches(matches.filter((m) => m.homeTeamId === currentTeamId || m.awayTeamId === currentTeamId))
+  }, [matches, currentTeamId])
+
+  const groupA = teams.filter((t) => t.group === 'A组').sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference)
+  const groupB = teams.filter((t) => t.group === 'B组').sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference)
+  const leagueTeams = teams.filter((t) => t.group === '学院联赛').sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference)
+
+  const getPlayerNameById = (pid: string) => {
+    const player = players.find((item) => item.id === pid || item.id === pid.replace(/^p/, ''))
+    return player?.name || pid
+  }
+
+  // AI生成（预测/攻略弹窗）- 优先后端，失败本地模板
   const generateAI = async (matchId: string, type: 'prediction' | 'preview') => {
-    await new Promise((r) => setTimeout(r, 1000))
     const match = matches.find((m) => m.id === matchId)
     if (!match) return
     const homeName = getTeamName(teams, match.homeTeamId)
     const awayName = getTeamName(teams, match.awayTeamId)
 
-    let content = ''
     if (type === 'prediction') {
-      content = `【AI比赛预测】\n\n对阵：${homeName} vs ${awayName}\n\n基于双方近期战绩、球员状态和历史交锋数据，自研机器学习模型预测结果如下：\n\n• ${homeName} 胜率：58%\n• 平局概率：27%\n• ${awayName} 胜率：15%\n\n总进球数预测：2.3球\n\n* 本预测仅供参考，不构成投注建议。`
-    } else {
-      content = `【AI赛前攻略】\n\n对阵：${homeName} vs ${awayName}\n\n一、关键对位分析\n1. 中场争夺将是胜负手，${homeName}的中场组织能力占优\n2. ${awayName}边路速度快，需注意防守身后球\n3. 定位球得分概率较高，建议加强训练\n\n二、战术建议\n• 主场作战建议主动控球，掌控比赛节奏\n• 上半场争取先声夺人，建立心理优势\n• 下半场注意体能分配，避免最后15分钟崩盘\n\n三、重点关注球员\n• ${homeName}：9号中锋状态火热，是主要得分点\n• ${awayName}：10号核心球员创造力强，需专人盯防\n\n* 本攻略由AI生成，仅供教练参考。`
+      try {
+        const data = (await api.fetchPrediction(matchId)) as {
+          probabilities?: Record<string, number>
+          predicted_score?: Record<string, number>
+          model?: string
+        }
+        const probabilities = data.probabilities ?? {}
+        const score = data.predicted_score ?? {}
+        const content = `【AI比赛预测】\n\n对阵：${homeName} vs ${awayName}\n\n基于双方近期战绩、球员状态和历史交锋数据，机器学习模型预测结果如下：\n\n• ${homeName} 胜率：${Math.round((probabilities.home_win ?? 0) * 100)}%\n• 平局概率：${Math.round((probabilities.draw ?? 0) * 100)}%\n• ${awayName} 胜率：${Math.round((probabilities.away_win ?? 0) * 100)}%\n\n预测比分：${homeName} ${score.home ?? '-'} : ${score.away ?? '-'} ${awayName}\n\n模型：${data.model === 'ml_model' ? '已训练模型' : '启发式估算'}\n\n* 本预测仅供参考，不构成投注建议。`
+        setAiContent({ matchId, type, content })
+        return
+      } catch {
+        // 后端不可达，回落本地模板
+      }
     }
-    setAiContent({ matchId, type, content })
+
+    try {
+      const data = (await api.fetchTactics(matchId)) as { summary?: string; sections?: Record<string, string> }
+      const sectionText = data.sections ? Object.entries(data.sections).map(([k, v]) => `${k}\n${v}`).join('\n\n') : ''
+      const content = `【AI赛前攻略】\n\n对阵：${homeName} vs ${awayName}\n\n${data.summary ?? ''}${sectionText ? `\n\n${sectionText}` : ''}`
+      setAiContent({ matchId, type, content })
+      return
+    } catch {
+      // 后端不可达，回落本地模板
+    }
+
+    setAiContent({
+      matchId,
+      type,
+      content:
+        type === 'prediction'
+          ? `【AI比赛预测】\n\n对阵：${homeName} vs ${awayName}\n\n基于双方近期战绩、球员状态和历史交锋数据，自研机器学习模型预测结果如下：\n\n• ${homeName} 胜率：58%\n• 平局概率：27%\n• ${awayName} 胜率：15%\n\n总进球数预测：2.3球\n\n* 本预测仅供参考，不构成投注建议。`
+          : `【AI赛前攻略】\n\n对阵：${homeName} vs ${awayName}\n\n一、关键对位分析\n1. 中场争夺将是胜负手，${homeName}的中场组织能力占优\n2. ${awayName}边路速度快，需注意防守身后球\n3. 定位球得分概率较高，建议加强训练\n\n二、战术建议\n• 主场作战建议主动控球，掌控比赛节奏\n• 上半场争取先声夺人，建立心理优势\n• 下半场注意体能分配，避免最后15分钟崩盘\n\n三、重点关注球员\n• ${homeName}：9号中锋状态火热，是主要得分点\n• ${awayName}：10号核心球员创造力强，需专人盯防\n\n* 本攻略由AI生成，仅供教练参考。`,
+    })
   }
 
   const submitReview = async () => {
-    if (!reviewText.trim()) return
+    if (!reviewText.trim() || !myFinishedMatch) return
     setSubmitting(true)
-    await new Promise((r) => setTimeout(r, 500))
-
-    const now = new Date()
-    const newReview = {
-      id: `review_${Date.now()}`,
-      matchId: matches[0]?.id || 'm1',
-      playerId: currentPlayerId,
-      authorRole: (currentRole === 'captain' ? 'captain' : 'member') as 'member' | 'captain',
-      content: reviewText,
-      aiSummary: '',
-      createdAt: `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`,
+    try {
+      await api.submitReview(myFinishedMatch.id, reviewText)
+      toast.success('赛后感想已提交')
+    } catch (err) {
+      toast.error(`提交失败：${(err as Error).message}`)
     }
-    setReviews([newReview, ...reviews])
     setReviewText('')
     setReviewDialogOpen(false)
     setSubmitting(false)
-    toast.success('赛后感想已提交')
   }
 
   return (
@@ -266,38 +324,36 @@ export default function HomePage() {
               </Select>
             </div>
 
-            <Tabs defaultValue="all" className="w-full">
+            <Tabs defaultValue="my" className="w-full">
               <TabsList className="mb-4">
                 <TabsTrigger value="all">全部赛程</TabsTrigger>
                 <TabsTrigger value="my">本队赛程</TabsTrigger>
               </TabsList>
 
               <TabsContent value="all" className="space-y-3">
-                {filteredMatches.map((match) => (
-                  <MatchCard
-                    key={match.id}
-                    match={match}
-                    teams={teams}
-                    onGenerateAI={generateAI}
-                    tacticContent={tacticContents[match.id]}
-                    tacticExpanded={tacticExpanded[match.id]}
-                    onToggleTactic={(id) => setTacticExpanded((prev) => ({ ...prev, [id]: !prev[id] }))}
-                  />
-                ))}
+                <ExpandableMatchList
+                  key="all"
+                  matches={filteredMatches}
+                  teams={teams}
+                  onGenerateAI={generateAI}
+                  tacticContents={tacticContents}
+                  tacticExpanded={tacticExpanded}
+                  onToggleTactic={(id) => setTacticExpanded((prev) => ({ ...prev, [id]: !prev[id] }))}
+                  currentTeamId={currentTeamId}
+                />
               </TabsContent>
 
               <TabsContent value="my" className="space-y-3">
-                {myTeamMatches.map((match) => (
-                  <MatchCard
-                    key={match.id}
-                    match={match}
-                    teams={teams}
-                    onGenerateAI={generateAI}
-                    tacticContent={tacticContents[match.id]}
-                    tacticExpanded={tacticExpanded[match.id]}
-                    onToggleTactic={(id) => setTacticExpanded((prev) => ({ ...prev, [id]: !prev[id] }))}
-                  />
-                ))}
+                <ExpandableMatchList
+                  key={`my-${currentTeamId}`}
+                  matches={myTeamMatches}
+                  teams={teams}
+                  onGenerateAI={generateAI}
+                  tacticContents={tacticContents}
+                  tacticExpanded={tacticExpanded}
+                  onToggleTactic={(id) => setTacticExpanded((prev) => ({ ...prev, [id]: !prev[id] }))}
+                  currentTeamId={currentTeamId}
+                />
               </TabsContent>
             </Tabs>
           </div>
@@ -311,9 +367,14 @@ export default function HomePage() {
               <h2 className="text-xl md:text-2xl font-bold text-foreground">积分榜</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <GroupTable title="A组" teams={groupA} />
-              <GroupTable title="B组" teams={groupB} />
+            <div className="space-y-6">
+              {leagueTeams.length > 0 && (
+                <GroupTable title="学院联赛积分榜" teams={leagueTeams} highlight />
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <GroupTable title="A组" teams={groupA} />
+                <GroupTable title="B组" teams={groupB} />
+              </div>
             </div>
           </div>
         </section>
@@ -365,6 +426,14 @@ export default function HomePage() {
                   <Lock className="size-10 text-muted-foreground mb-3" />
                   <p className="text-muted-foreground">本区域为队内私有内容</p>
                   <p className="text-sm text-muted-foreground mt-1">切换为「普通队员」或「队长」身份后可查看</p>
+                </CardContent>
+              </Card>
+            ) : !myFinishedMatch ? (
+              <Card className="border-dashed">
+                <CardContent className="py-12 flex flex-col items-center text-center">
+                  <FileText className="size-10 text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">该队暂无已结束比赛，暂无可复盘内容</p>
+                  <p className="text-sm text-muted-foreground mt-1">可在顶栏切换所属球队，查看其他球队的赛后复盘</p>
                 </CardContent>
               </Card>
             ) : (
@@ -424,9 +493,9 @@ export default function HomePage() {
                 <div className="space-y-3">
                   <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <span>队员感想</span>
-                    <Badge variant="outline" className="text-xs">{reviews.length} 份</Badge>
+                    <Badge variant="outline" className="text-xs">{myMatchReviews.length} 份</Badge>
                   </div>
-                  {reviews.map((review) => (
+                  {myMatchReviews.map((review) => (
                     <Card
                       key={review.id}
                       className={cn(
@@ -499,181 +568,12 @@ export default function HomePage() {
   )
 }
 
-function MatchCard({
-  match,
-  teams,
-  onGenerateAI,
-  tacticContent,
-  tacticExpanded,
-  onToggleTactic,
-}: {
-  match: IMatch
-  teams: { id: string; name: string; group: string; played: number; won: number; drawn: number; lost: number; goalsFor: number; goalsAgainst: number; goalDifference: number; points: number; logoUrl: string }[]
-  onGenerateAI: (matchId: string, type: 'prediction' | 'preview') => void
-  tacticContent?: string
-  tacticExpanded?: boolean
-  onToggleTactic: (id: string) => void
-}) {
-  const homeName = getTeamName(teams, match.homeTeamId)
-  const awayName = getTeamName(teams, match.awayTeamId)
-  const status = STATUS_LABEL[match.status]
-  const isMyTeam = match.homeTeamId === MY_TEAM_ID || match.awayTeamId === MY_TEAM_ID
-
-  // 解析时间：日期和具体时间分开
-  const timeParts = match.time.split(' ')
-  const dateStr = timeParts[0] || match.time
-  const timeStr = timeParts[1] || ''
-
+function GroupTable({ title, teams, highlight = false }: { title: string; teams: { id: string; name: string; played: number; won: number; drawn: number; lost: number; goalsFor: number; goalsAgainst: number; goalDifference: number; points: number }[]; highlight?: boolean }) {
   return (
-    <Card className={cn('overflow-hidden', isMyTeam && 'border-primary/30 bg-primary/[0.02]')}>
-      <CardContent className="p-4 md:p-5">
-        {/* 顶部：阶段 + 状态 */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant="outline" className="text-xs">
-              {match.stage === 'group' ? match.groupName : '淘汰赛'}
-            </Badge>
-            <Badge className={cn('text-xs font-normal', status.className)}>
-              {status.label}
-            </Badge>
-            {isMyTeam && (
-              <Badge variant="secondary" className="text-xs">本队</Badge>
-            )}
-          </div>
-        </div>
-
-        {/* 主体：对阵信息 + 时间地点（纵向堆叠在右侧） */}
-        <div className="flex items-stretch gap-4">
-          {/* 对阵双方 - 两行布局 */}
-          <div className="flex-1 min-w-0">
-            <div className="space-y-1.5">
-              {/* 主队行 */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground w-8 shrink-0">主队</span>
-                <span
-                  className={cn(
-                    'font-bold text-base md:text-lg flex-1 min-w-0 truncate',
-                    match.status === 'finished'
-                      ? (match.homeScore ?? 0) > (match.awayScore ?? 0)
-                        ? 'text-red-600'
-                        : (match.homeScore ?? 0) < (match.awayScore ?? 0)
-                        ? 'text-muted-foreground font-medium'
-                        : ''
-                      : ''
-                  )}
-                >
-                  {homeName}
-                </span>
-                {match.status === 'finished' ? (
-                  <span className="shrink-0 px-2.5 py-0.5 text-sm font-bold tabular-nums rounded-md bg-gray-100 text-gray-700 min-w-[36px] text-center">
-                    {match.homeScore}
-                  </span>
-                ) : null}
-              </div>
-              {/* 客队行 */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground w-8 shrink-0">客队</span>
-                <span
-                  className={cn(
-                    'font-bold text-base md:text-lg flex-1 min-w-0 truncate',
-                    match.status === 'finished'
-                      ? (match.awayScore ?? 0) > (match.homeScore ?? 0)
-                        ? 'text-red-600'
-                        : (match.awayScore ?? 0) < (match.homeScore ?? 0)
-                        ? 'text-muted-foreground font-medium'
-                        : ''
-                      : ''
-                  )}
-                >
-                  {awayName}
-                </span>
-                {match.status === 'finished' ? (
-                  <span className="shrink-0 px-2.5 py-0.5 text-sm font-bold tabular-nums rounded-md bg-gray-100 text-gray-700 min-w-[36px] text-center">
-                    {match.awayScore}
-                  </span>
-                ) : (
-                  <span className="shrink-0 text-sm text-muted-foreground font-medium w-[36px] text-center">vs</span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* 时间地点 - 纵向堆叠 */}
-          <div className="w-36 shrink-0 border-l border-border/50 pl-4 space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <CalendarDays className="size-3" />
-              <span>{dateStr}</span>
-            </div>
-            {timeStr && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Clock className="size-3" />
-                <span>{timeStr}</span>
-              </div>
-            )}
-            <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
-              <MapPin className="size-3 shrink-0 mt-0.5" />
-              <span className="line-clamp-2">{match.venue}</span>
-            </div>
-          </div>
-        </div>
-
-        {match.status === 'upcoming' && tacticContent && (
-          <div className="mt-4 pt-3 border-t border-border/50">
-            {/* AI赛前战术攻略 - 内嵌展示 */}
-            <div className="border border-dashed border-primary/40 bg-primary/[0.03] rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Swords className="size-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">AI赛前战术攻略</span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs gap-1"
-                  onClick={() => onToggleTactic(match.id)}
-                >
-                  {tacticExpanded ? '收起' : '展开详情'}
-                  {tacticExpanded ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
-                </Button>
-              </div>
-              <div
-                className={cn(
-                  'text-sm text-muted-foreground bg-card/60 rounded-md p-2.5 overflow-hidden transition-all leading-relaxed',
-                  tacticExpanded ? 'max-h-[420px] overflow-y-auto' : 'max-h-[3.5rem]'
-                )}
-              >
-                {tacticExpanded ? (
-                  <div className="whitespace-pre-line text-foreground/90">{tacticContent}</div>
-                ) : (
-                  <div className="line-clamp-2">{extractSummary(tacticContent, 100)}</div>
-                )}
-              </div>
-            </div>
-
-            {/* 次级 AI 按钮 */}
-            <div className="flex items-center justify-center gap-2 mt-3">
-              <Button
-                variant="secondary"
-                size="sm"
-                className="gap-1 h-8 text-xs"
-                onClick={() => onGenerateAI(match.id, 'prediction')}
-              >
-                <Zap className="size-3.5 text-amber-500" />
-                AI预测
-              </Button>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
-
-function GroupTable({ title, teams }: { title: string; teams: { id: string; name: string; played: number; won: number; drawn: number; lost: number; goalsFor: number; goalsAgainst: number; goalDifference: number; points: number }[] }) {
-  return (
-    <Card>
+    <Card className={cn(highlight && 'border-primary/40 bg-primary/[0.02]')}>
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold">{title}</CardTitle>
+        {highlight && <CardDescription className="text-xs">427 场真实赛事纪录实时计算</CardDescription>}
       </CardHeader>
       <CardContent className="p-0">
         <div className="w-full overflow-x-auto">

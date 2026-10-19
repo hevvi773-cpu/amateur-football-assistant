@@ -67,29 +67,46 @@
 
 ### 后端（已随仓库交付，FastAPI）
 
-- FastAPI + uvicorn（端口 8000）
-- SQLite（轻量级，适合单赛区场景）
-- ML 预测服务：`backend/app/services/ml_prediction.py`，加载 `backend/models/score_predictor.pkl`；文件缺失时自动回退到规则预测
-- `score_predictor.pkl` 由 `football_ml_experiment.ipynb` 运行产出（随机森林，特征 `[主队编码, 客队编码, 1]`，类别 `{1, 0, -1}`）
+- FastAPI + uvicorn（端口 8000），入口 `backend/run.py`，应用对象 `backend/app/main.py`
+- SQLite：`backend/data/football.db`（427 场真实赛事数据，由 `backend/scripts/import_season_records.py` 导入）
+- 比分预测：`backend/app/services/prediction.py`，三分类 Softmax 回归（`backend/app/services/softmax_model.py`，纯 Python 零依赖实现），模型文件 `backend/models/prediction_model.pkl` 由 `backend/scripts/train_model.py` 训练产出；文件缺失或推理失败时自动回退启发式（积分 / 净胜球 / 主客场 / 伤停）
+- 身份模拟：无登录体系，通过请求头 `X-User-Id` / `X-User-Role` 传递当前身份
+- 测试：`backend/tests/`（pytest）
+- 大模型配置：`backend/.env`（`AI_MODE` / `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`），未配置时 AI 生成类能力自动降级为内置模板
 
 ### 项目结构
 
 ```
-src/
-├── app.tsx              # 应用入口与路由
-├── components/          # 公共组件
-│   ├── Header.tsx
-│   ├── Layout.tsx
-│   └── ui/              # shadcn/ui 组件（30+）
-├── pages/               # 四个主页面
-│   ├── Home/            # 首页（赛程、积分榜、AI 预测）
-│   ├── Lineup/          # 阵容页 / 赛事管理（协会身份）
-│   ├── Social/          # 约球页
-│   └── Profile/         # 个人中心（身份切换、身体状态、赛后感想）
-└── ...
+football-ai-assistant/
+├── src/                        # 前端（React 19 + TS + Tailwind 4 + shadcn/ui）
+│   ├── app.tsx                 # 路由配置
+│   ├── components/             # 公共组件（Header / Layout / ui）
+│   ├── pages/                  # 四个主页面
+│   │   ├── HomePage/           # 首页（赛程、积分榜、AI 预测）
+│   │   ├── LineupPage/         # 阵容页 / 赛事管理（协会身份）
+│   │   ├── SocialPage/         # 约球页
+│   │   └── ProfilePage/        # 个人中心
+│   ├── lib/
+│   │   ├── api.ts              # 后端 API 客户端（前端唯一数据出入口）
+│   │   └── mappers.ts          # snake_case -> 前端类型映射
+│   └── data/                   # 类型定义与兜底数据（运行时数据来自后端）
+├── backend/
+│   ├── app/
+│   │   ├── routers/            # 10 个路由模块（ai / matches / lineup / social ...）
+│   │   ├── services/           # 业务服务层（prediction / generators / llm ...）
+│   │   ├── models.py           # SQLAlchemy 模型
+│   │   └── schemas.py          # Pydantic 出入参
+│   ├── scripts/                # 训练与数据导入脚本
+│   ├── tests/                  # pytest 冒烟测试
+│   ├── data/                   # SQLite 数据库（不纳入版本库）
+│   └── models/                 # 训练产物 pkl（不纳入版本库）
+├── docs/                       # PRD、ML 实验报告、设计图例
+├── football_ml_experiment.ipynb# 可复现 ML 实验 Notebook
+├── docker-compose.yml          # Docker 一键部署（前端 8080 / 后端 8000）
+├── Dockerfile.frontend         # 前端多阶段镜像（Vite 构建 + nginx 反代）
+├── Dockerfile.backend          # 后端镜像
+└── nginx.conf                  # nginx 反代与 SPA 路由回退配置
 ```
-
-共 124 个文件，80+ 源文件。
 
 ---
 
@@ -122,7 +139,7 @@ src/
 - 三分类（胜/平/负）学不出平局——平局样本少且特征不明显，模型倾向于预测胜负（三分类留出 74.6%，多数来自胜负正确）
 - 小样本不确定性——2026 留出仅 63–65 场，置信区间较宽（方向 81.0% 的 CI≈[69.6, 88.8]），点估计不宜过度解读
 - 随机森林在 63 场留出集上达 100% 为小样本 + 强信号下的偶然，并非稳健泛化证据
-- 部署模型（`score_predictor.pkl`）是「队间历史实力查表」（全量训练），对新赛季 / 未充分交锋的球队泛化有限；后端缺失 pkl 时自动回退规则预测
+- 实验导出的部署模型（`score_predictor.pkl`，随机森林查表式）对新赛季 / 未充分交锋的球队泛化有限，因此**线上服务并未采用它**；`backend` 实际使用 `scripts/train_model.py` 从数据库重新训练的 Softmax 回归，两者是不同模型，不要混为一谈
 - LLM 盲测不可复现——大模型预测结果在重复测试中不一致，不适合需要可复现的预测场景
 
 ---
@@ -131,33 +148,48 @@ src/
 
 ### 前置要求
 
-- Node.js ≥ 18
-- npm / pnpm / yarn
+- Node.js ≥ 18、npm
+- Python ≥ 3.11（后端）
+- 或直接使用 Docker + Docker Compose
 
-### 安装与运行
+### 方式一：Docker 一键部署（推荐）
 
 ```bash
-# 安装依赖
-npm install
+# 配置大模型（可选，不配则 AI 生成类能力走内置模板）
+cp .env.example .env   # 编辑 .env 填入 LLM_API_KEY 等
 
-# 开发模式
-npm run dev
-
-# 构建
-npm run build
-
-# 预览构建结果
-npm run preview
+docker compose up -d
 ```
+
+访问 <http://localhost:8080>。nginx 将 `/api` 反代到后端容器，前端无需关心后端地址。
+
+### 方式二：本地前后端分离
+
+```bash
+# --- 后端（端口 8000）---
+cd backend
+python -m venv .venv
+.venv\Scripts\activate          # Windows；macOS/Linux 用 source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env            # 可选，配置大模型
+python run.py
+
+# --- 前端（端口 8001）---
+npm install
+npm run dev:win
+```
+
+> ⚠️ **已知问题**：`src/lib/api.ts` 中 `API_BASE` 硬编码为 `http://localhost:8010/api`，该值仅在 Docker 构建时被 `Dockerfile.frontend` 替换为相对路径 `/api`。本地分离开发时前端会请求 8010 端口而后端实际监听 8000，需要在 `vite.config.ts` 中补一条 `server.proxy` 把 `/api` 转发到 `http://localhost:8000`，或将 `API_BASE` 改为读取环境变量。此问题尚未修复。
 
 ### 环境变量
 
-AI 能力需要配置大模型 API Key（可选，未配置时自动降级为 mock 数据）：
+后端 AI 能力配置（`backend/.env`，可选；未配置时自动降级为 mock / 内置模板）：
 
 ```
-# .env
-VITE_LLM_API_KEY=your_api_key_here
-VITE_LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+AI_MODE=auto
+LLM_API_KEY=your_api_key_here
+LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+LLM_MODEL=qwen-plus
 ```
 
 > 未配置 API Key 时，AI 生成类能力返回 mock 数据，不影响基础业务功能。
@@ -181,12 +213,13 @@ VITE_LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 
 本项目为课程设计项目，当前状态：
 
-- ✅ 前端四页面已实现（React + TS，124 文件）
-- ✅ PRD V1.1 完成（To-be 设计稿，评审中）
-- ✅ ML 预测模型实验完成（独立实验报告 + 可复现 Notebook）
-- ✅ 后端 FastAPI 已随仓库交付；ML 预测服务已集成（缺 `score_predictor.pkl` 时回退规则）
-- 🚧 AI 生成类能力部分为 mock / 前端模板，未接入真实大模型
-- 🚧 `score_predictor.pkl` 需运行 `football_ml_experiment.ipynb` 本地生成后放入 `backend/models/`（未纳入版本库）
+- ✅ 前端四页面已实现（React 19 + TS，数据经 `lib/api.ts` 全部走后端）
+- ✅ 后端 FastAPI 完整交付：10 个路由模块、三角色权限、SQLite 真实赛事数据、pytest 冒烟测试
+- ✅ Docker 一键部署（前端 nginx 8080 反代 / 后端 8000）
+- ✅ 比分预测使用自研 Softmax 回归（`backend/scripts/train_model.py` 训练），非大模型
+- 🚧 AI 生成类能力（战术攻略 / 阵容推荐 / 赛后复盘）在未配置 API Key 时走内置模板，接入真实大模型后可切换
+- 🚧 `prediction_model.pkl` 未纳入版本库，克隆后需执行 `cd backend && python scripts/train_model.py` 生成本地模型，否则自动回退启发式
+- 🚧 本地分离开发时前端 API 基地址与后端端口不一致（见「快速开始」中的已知问题）
 
 > 本项目的核心价值在于：完整的产品设计思维（PRD + 三角色权限 + AI-First 架构）+ 严谨的 ML 实验方法论（14 种方法对比 + 诚实的局限性分析），而非功能的完整上线。
 

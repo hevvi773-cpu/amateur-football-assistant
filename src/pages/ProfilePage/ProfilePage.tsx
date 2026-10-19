@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input'
 import { User, Heart, HeartPulse, Activity, Ban, Shield, Check, Plus, X, ChevronDown, Crown, Users, Building2, Eye, Trophy, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react'
 import { useApp, type UserRole } from '@/context/AppContext'
 import { IPlayer } from '@/data/players'
+import * as api from '@/lib/api'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Image } from '@/components/ui/image'
@@ -41,9 +42,10 @@ const ROLE_OPTIONS: { value: UserRole; label: string; icon: typeof User; color: 
 ]
 
 export default function ProfilePage() {
-  const { currentRole, players, currentPlayerId, setCurrentRole } = useApp()
+  const { currentRole, players, currentPlayerId, setCurrentRole, teams, currentTeamId } = useApp()
 
   const currentPlayer = players.find((p) => p.id === currentPlayerId)
+  const currentTeamName = teams.find((t) => t.id === currentTeamId)?.name ?? currentTeamId
 
   const currentRoleOpt = ROLE_OPTIONS.find((r) => r.value === currentRole)
   const RoleIcon = currentRoleOpt?.icon || User
@@ -53,8 +55,57 @@ export default function ProfilePage() {
       <div className="min-h-screen">
         <main className="space-y-6 py-6">
           <section className="w-full">
-            <div className="max-w-3xl mx-auto px-4 md:px-6 flex items-center justify-center min-h-[50vh]">
-              <p className="text-muted-foreground">未找到用户信息</p>
+            <div className="max-w-3xl mx-auto px-4 md:px-6">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">个人中心</h1>
+                  <p className="text-muted-foreground text-sm mt-1">管理你的个人信息与身体状态</p>
+                </div>
+
+                {/* 身份切换 */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" className="gap-2">
+                      <RoleIcon className={cn('size-4', currentRoleOpt?.color)} />
+                      <span className="text-sm">{currentRoleOpt?.label}</span>
+                      <ChevronDown className="size-3 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    {ROLE_OPTIONS.map((opt) => {
+                      const Icon = opt.icon
+                      const isActive = currentRole === opt.value
+                      return (
+                        <DropdownMenuItem
+                          key={opt.value}
+                          onClick={() => {
+                            setCurrentRole(opt.value)
+                            toast.success(`已切换为「${opt.label}」身份`)
+                          }}
+                          className={cn('gap-2', isActive && 'bg-accent')}
+                        >
+                          <Icon className={cn('size-4', opt.color)} />
+                          <span className="text-sm">{opt.label}</span>
+                          {isActive && <Check className="size-3 ml-auto text-primary" />}
+                        </DropdownMenuItem>
+                      )
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <Card className="border-dashed">
+                <CardContent className="py-14 flex flex-col items-center text-center">
+                  <Users className="size-10 text-muted-foreground mb-3" />
+                  <p className="text-foreground font-medium">「{currentTeamName}」暂无球员档案</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {currentRole === 'association' ? '协会视角可直接查看全赛区总览' : '该队尚未录入球员数据，切换球队后即可管理个人状态'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-3">可在顶栏切换所属球队</p>
+                </CardContent>
+              </Card>
+
+              {currentRole === 'association' && <div className="mt-6"><LeagueOverview /></div>}
             </div>
           </section>
         </main>
@@ -127,7 +178,7 @@ export default function ProfilePage() {
                     <span>·</span>
                     <span>{currentPlayer.position}</span>
                     <span>·</span>
-                    <span>南宁联队</span>
+                    <span>{currentTeamName}</span>
                   </div>
                 </div>
                 <div className="text-right hidden md:block">
@@ -159,7 +210,7 @@ export default function ProfilePage() {
 
 // 队员个人设置
 function PlayerSettings({ player }: { player: IPlayer }) {
-  const { setPlayers, players, currentPlayerId } = useApp()
+  const { setPlayers, players, currentPlayerId, dataSource } = useApp()
   const [health, setHealth] = useState(player.healthStatus)
   const [traits, setTraits] = useState<string[]>(player.personalTraits)
   const [customInput, setCustomInput] = useState('')
@@ -192,15 +243,25 @@ function PlayerSettings({ player }: { player: IPlayer }) {
 
   const save = async () => {
     setSaving(true)
-    await new Promise((r) => setTimeout(r, 400))
-    const updated = players.map((p) =>
-      p.id === currentPlayerId
-        ? { ...p, healthStatus: health, personalTraits: traits }
-        : p
-    )
-    setPlayers(updated)
-    setSaving(false)
-    toast.success('保存成功')
+    try {
+      if (dataSource === 'api') {
+        await api.updateHealth(player.id, health)
+        await api.updateTraits(player.id, traits)
+      } else {
+        await new Promise((r) => setTimeout(r, 400))
+      }
+      const updated = players.map((p) =>
+        p.id === currentPlayerId
+          ? { ...p, healthStatus: health, personalTraits: traits }
+          : p
+      )
+      setPlayers(updated)
+      toast.success('保存成功')
+    } catch (err) {
+      toast.error(`保存失败：${(err as Error).message}`)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const currentHealth = HEALTH_OPTIONS.find((h) => h.value === health)

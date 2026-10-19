@@ -1,0 +1,2282 @@
+{
+ "source": "C:\\Users\\34602\\OneDrive\\Documents\\项目2.0\\26-22赛事纪录\\26赛事纪录.docx",
+ "teams": {
+  "人工智能学院": [
+   {
+    "number": 8,
+    "name": "ELABY NOUH",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "阿卜杜巴日·艾山",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "阿卜杜巴日艾山尝试",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "蒋志翔",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "林智翔",
+    "position": "unknown"
+   },
+   {
+    "number": 15,
+    "name": "周佳鲲也",
+    "position": "unknown"
+   },
+   {
+    "number": 21,
+    "name": "普桑",
+    "position": "unknown"
+   },
+   {
+    "number": 23,
+    "name": "邓思礼",
+    "position": "unknown"
+   },
+   {
+    "number": 30,
+    "name": "Yassirel faricha",
+    "position": "unknown"
+   },
+   {
+    "number": 47,
+    "name": "Barnabas",
+    "position": "unknown"
+   },
+   {
+    "number": 47,
+    "name": "队员",
+    "position": "unknown"
+   }
+  ],
+  "体育学院体育教育队": [
+   {
+    "number": 3,
+    "name": "吴豪",
+    "position": "unknown"
+   },
+   {
+    "number": 4,
+    "name": "符仁喜",
+    "position": "unknown"
+   },
+   {
+    "number": 5,
+    "name": "曹道萍",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "王嘉慧",
+    "position": "unknown"
+   },
+   {
+    "number": 13,
+    "name": "李墨涵",
+    "position": "unknown"
+   },
+   {
+    "number": 14,
+    "name": "秦开宇翔",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "李泓德",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "关永恒",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "阿力哈尔·叶尔江",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "阿加依·叶尔江",
+    "position": "unknown"
+   },
+   {
+    "number": 24,
+    "name": "江海瑜",
+    "position": "unknown"
+   },
+   {
+    "number": 25,
+    "name": "施智涵右路",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "王振国",
+    "position": "unknown"
+   },
+   {
+    "number": 33,
+    "name": "李墨涵",
+    "position": "unknown"
+   },
+   {
+    "number": 35,
+    "name": "费嘉新",
+    "position": "unknown"
+   },
+   {
+    "number": 79,
+    "name": "热杰普·乌斯曼",
+    "position": "unknown"
+   },
+   {
+    "number": 88,
+    "name": "宾俊威",
+    "position": "unknown"
+   },
+   {
+    "number": 99,
+    "name": "周榆",
+    "position": "unknown"
+   }
+  ],
+  "体育学院研究生队": [
+   {
+    "number": 1,
+    "name": "王誉慧",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "胡泰然",
+    "position": "unknown"
+   },
+   {
+    "number": 15,
+    "name": "戴雨琼",
+    "position": "unknown"
+   },
+   {
+    "number": 16,
+    "name": "刘佳兴",
+    "position": "unknown"
+   },
+   {
+    "number": 21,
+    "name": "罗姝来",
+    "position": "unknown"
+   },
+   {
+    "number": 31,
+    "name": "彭宇洋",
+    "position": "unknown"
+   }
+  ],
+  "农学与生物科技学院": [
+   {
+    "number": 1,
+    "name": "赵泓杰",
+    "position": "unknown"
+   },
+   {
+    "number": 5,
+    "name": "赵怡博",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "李小力",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "苟锐骐",
+    "position": "unknown"
+   },
+   {
+    "number": 15,
+    "name": "程瑾瑞",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "夏秋实",
+    "position": "unknown"
+   },
+   {
+    "number": 21,
+    "name": "魏楠",
+    "position": "unknown"
+   },
+   {
+    "number": 23,
+    "name": "李昊博",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "刘永恒",
+    "position": "unknown"
+   },
+   {
+    "number": 77,
+    "name": "孙益州",
+    "position": "unknown"
+   }
+  ],
+  "创新创业学院": [
+   {
+    "number": 4,
+    "name": "刘承煜跑",
+    "position": "unknown"
+   },
+   {
+    "number": 5,
+    "name": "贺靖航",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "袁语隆",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "徐奇峰",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "彭泓铭",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "余康",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "于寰宇",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "兰天",
+    "position": "unknown"
+   },
+   {
+    "number": 24,
+    "name": "黄晓彤",
+    "position": "unknown"
+   },
+   {
+    "number": 25,
+    "name": "郑昊宇",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "刘笑辰",
+    "position": "unknown"
+   }
+  ],
+  "动物医学学院": [
+   {
+    "number": 12,
+    "name": "呼斯冷",
+    "position": "unknown"
+   },
+   {
+    "number": 13,
+    "name": "郁峻",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "王柏机会",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "格桑久美右侧肋部",
+    "position": "unknown"
+   },
+   {
+    "number": 47,
+    "name": "李晨晨",
+    "position": "unknown"
+   },
+   {
+    "number": 66,
+    "name": "邓磊",
+    "position": "unknown"
+   }
+  ],
+  "动物科学学院": [
+   {
+    "number": 1,
+    "name": "孙赫",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "谯允宣",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "阮曌",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "张任豪",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "赵铭",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "符春志",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "李瑞雪",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "冯彦龙",
+    "position": "unknown"
+   },
+   {
+    "number": 28,
+    "name": "韩诗豪",
+    "position": "unknown"
+   },
+   {
+    "number": 84,
+    "name": "文东吉",
+    "position": "unknown"
+   }
+  ],
+  "化学化工学院": [
+   {
+    "number": 3,
+    "name": "赵云辉",
+    "position": "unknown"
+   },
+   {
+    "number": 3,
+    "name": "赵梓烨因未经许可擅自",
+    "position": "unknown"
+   },
+   {
+    "number": 5,
+    "name": "曹一超",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "黄月",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "刘子涵",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "陶炫志",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "刘子涵敏锐",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "郭文涛发出",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "姚建杰",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "刘阳",
+    "position": "unknown"
+   },
+   {
+    "number": 29,
+    "name": "庞辉",
+    "position": "unknown"
+   },
+   {
+    "number": 30,
+    "name": "唐源",
+    "position": "unknown"
+   },
+   {
+    "number": 95,
+    "name": "谭书恒放",
+    "position": "unknown"
+   }
+  ],
+  "历史文化学院": [
+   {
+    "number": 1,
+    "name": "刘畅",
+    "position": "门将"
+   },
+   {
+    "number": 3,
+    "name": "木斯塔帕",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "王润东",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "江博德",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "木扎帕尔",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "木札",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "张敳博",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "范梦成",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "赵林晨",
+    "position": "unknown"
+   },
+   {
+    "number": 24,
+    "name": "赵林晨",
+    "position": "unknown"
+   },
+   {
+    "number": 32,
+    "name": "叶尔阿乐",
+    "position": "unknown"
+   }
+  ],
+  "商贸学院": [
+   {
+    "number": 3,
+    "name": "赵睿前叉",
+    "position": "unknown"
+   },
+   {
+    "number": 4,
+    "name": "阿力甫",
+    "position": "unknown"
+   },
+   {
+    "number": 4,
+    "name": "陈果",
+    "position": "unknown"
+   },
+   {
+    "number": 5,
+    "name": "黄晓璐等球员",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "谢家涌",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "刘湘悦",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "马佳扬",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "杨浩宇",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "王文浩宇",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "张深冉",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "彭天翔",
+    "position": "unknown"
+   },
+   {
+    "number": 14,
+    "name": "曾垚",
+    "position": "unknown"
+   },
+   {
+    "number": 15,
+    "name": "张益诚",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "黄晨洲",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "刘一骏",
+    "position": "unknown"
+   },
+   {
+    "number": 21,
+    "name": "张荣基",
+    "position": "unknown"
+   },
+   {
+    "number": 23,
+    "name": "陈帅豪",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "刘冠乐",
+    "position": "unknown"
+   },
+   {
+    "number": 28,
+    "name": "袁笙珲",
+    "position": "unknown"
+   },
+   {
+    "number": 69,
+    "name": "开出",
+    "position": "unknown"
+   },
+   {
+    "number": 69,
+    "name": "袁笙晖",
+    "position": "unknown"
+   },
+   {
+    "number": 69,
+    "name": "袁笙珲外围",
+    "position": "unknown"
+   },
+   {
+    "number": 77,
+    "name": "张轩章",
+    "position": "unknown"
+   }
+  ],
+  "园艺园林学院": [
+   {
+    "number": 4,
+    "name": "张一天强势",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "杨帆",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "刘滨豪",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "扎西江措",
+    "position": "unknown"
+   },
+   {
+    "number": 14,
+    "name": "郑懿宸",
+    "position": "门将"
+   },
+   {
+    "number": 19,
+    "name": "夏迪亚阿卜",
+    "position": "unknown"
+   },
+   {
+    "number": 23,
+    "name": "张柏",
+    "position": "unknown"
+   },
+   {
+    "number": 33,
+    "name": "王鹏程",
+    "position": "unknown"
+   }
+  ],
+  "国家治理学院": [
+   {
+    "number": 1,
+    "name": "饶梓涵",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "伊力扎特",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "徐奇峰和",
+    "position": "unknown"
+   },
+   {
+    "number": 13,
+    "name": "张疆华",
+    "position": "unknown"
+   },
+   {
+    "number": 14,
+    "name": "杨军",
+    "position": "unknown"
+   },
+   {
+    "number": 14,
+    "name": "柯金桦",
+    "position": "unknown"
+   },
+   {
+    "number": 16,
+    "name": "赵朝胤",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "齐志豪",
+    "position": "unknown"
+   },
+   {
+    "number": 25,
+    "name": "史鹏宇",
+    "position": "unknown"
+   },
+   {
+    "number": 26,
+    "name": "柯金桦",
+    "position": "unknown"
+   },
+   {
+    "number": 45,
+    "name": "陈恒宇",
+    "position": "unknown"
+   },
+   {
+    "number": 77,
+    "name": "席翰杰站上",
+    "position": "unknown"
+   },
+   {
+    "number": 77,
+    "name": "席铭杰",
+    "position": "unknown"
+   },
+   {
+    "number": 93,
+    "name": "李梓豪",
+    "position": "unknown"
+   }
+  ],
+  "国际学院": [
+   {
+    "number": 5,
+    "name": "EI Mehdi Alami",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "OUDOMPHONE PHANOUVONG",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "MBAH LAWRENCE CHIDERA",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "Tohir Matkaziev",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "Badr asserar",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "Tolise Kristen Joshua",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "Toyise Krisitin Joshua",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "Anou Duangsomphong",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "duangsomphone",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "赵宇皓尝试",
+    "position": "unknown"
+   },
+   {
+    "number": 13,
+    "name": "Aarav Gerard Narayan",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "Trieu Nhat Thong",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "陈东波",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "陶彦淞",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "NGUYEN TUANNHAT",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "BUI ANH QUAN",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "Matkaziev",
+    "position": "unknown"
+   },
+   {
+    "number": 26,
+    "name": "TANAPIPAT CHINCHERDWONG",
+    "position": "unknown"
+   },
+   {
+    "number": 26,
+    "name": "tanapipat caincherveng",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "PATHOMPHONG LUEANGRUNGSAP",
+    "position": "unknown"
+   },
+   {
+    "number": 29,
+    "name": "Tran Thanh Phong",
+    "position": "unknown"
+   },
+   {
+    "number": 61,
+    "name": "OUDOMPHONE PHANOUVONG",
+    "position": "unknown"
+   },
+   {
+    "number": 88,
+    "name": "NGUYEN VU NHAT NAM",
+    "position": "unknown"
+   }
+  ],
+  "地理科学学院": [
+   {
+    "number": 3,
+    "name": "黄弋戈",
+    "position": "unknown"
+   },
+   {
+    "number": 3,
+    "name": "黄戈弋",
+    "position": "unknown"
+   },
+   {
+    "number": 4,
+    "name": "田园",
+    "position": "unknown"
+   },
+   {
+    "number": 5,
+    "name": "马俊楠",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "何俊豪",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "周恒",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "王前翰",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "索朗",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "索郎次仁",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "朱俊成",
+    "position": "unknown"
+   },
+   {
+    "number": 13,
+    "name": "邓恒",
+    "position": "unknown"
+   },
+   {
+    "number": 15,
+    "name": "Adelaide ismall ademola",
+    "position": "unknown"
+   },
+   {
+    "number": 15,
+    "name": "adelabe isamll ademola",
+    "position": "unknown"
+   },
+   {
+    "number": 15,
+    "name": "adelabu ismail ademola",
+    "position": "unknown"
+   },
+   {
+    "number": 15,
+    "name": "adelube isamll ademola",
+    "position": "unknown"
+   },
+   {
+    "number": 18,
+    "name": "阿岩",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "李旦",
+    "position": "unknown"
+   },
+   {
+    "number": 23,
+    "name": "孙语",
+    "position": "unknown"
+   },
+   {
+    "number": 26,
+    "name": "曾昊楠",
+    "position": "unknown"
+   },
+   {
+    "number": 29,
+    "name": "罗明",
+    "position": "unknown"
+   },
+   {
+    "number": 30,
+    "name": "李俊达",
+    "position": "unknown"
+   },
+   {
+    "number": 33,
+    "name": "刘玮轩",
+    "position": "unknown"
+   },
+   {
+    "number": 45,
+    "name": "谭朝炜",
+    "position": "unknown"
+   },
+   {
+    "number": 50,
+    "name": "陈东波",
+    "position": "unknown"
+   },
+   {
+    "number": 71,
+    "name": "王文鑫",
+    "position": "unknown"
+   },
+   {
+    "number": 99,
+    "name": "梅尔班叶尔肯",
+    "position": "unknown"
+   }
+  ],
+  "外国语学院": [
+   {
+    "number": 3,
+    "name": "胡刚莹阻",
+    "position": "unknown"
+   },
+   {
+    "number": 5,
+    "name": "游嘉星",
+    "position": "unknown"
+   },
+   {
+    "number": 5,
+    "name": "王子义",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "Aripzhan Dinmukhammed",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "陈鲲尧",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "吴雪松",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "王文浩宇灵性漏球让队友",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "陈越宇",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "谢明村",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "刘冠乐进球",
+    "position": "unknown"
+   },
+   {
+    "number": 33,
+    "name": "陈来宝",
+    "position": "unknown"
+   },
+   {
+    "number": 77,
+    "name": "刘志远",
+    "position": "unknown"
+   },
+   {
+    "number": 99,
+    "name": "牟秋涵",
+    "position": "unknown"
+   }
+  ],
+  "工程技术学院": [
+   {
+    "number": 1,
+    "name": "刘畅依旧专注",
+    "position": "unknown"
+   },
+   {
+    "number": 1,
+    "name": "骆贝隆",
+    "position": "unknown"
+   },
+   {
+    "number": 4,
+    "name": "叶尔勒克",
+    "position": "unknown"
+   },
+   {
+    "number": 4,
+    "name": "居马努尔",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "阿旺晋美",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "代吾然·热扎衣买买提",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "代吾然热扎衣买买提",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "热扎依买买提",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "刘子涵和",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "范隽嵩",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "陶炫志右路爆破",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "程泉",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "叶德力·托合山外围尝试",
+    "position": "unknown"
+   },
+   {
+    "number": 14,
+    "name": "叶尔波力·乌",
+    "position": "unknown"
+   },
+   {
+    "number": 16,
+    "name": "熊毅",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "杨皓宇",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "朗加坚参",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "姚建杰独自一人",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "蒋佳明",
+    "position": "unknown"
+   },
+   {
+    "number": 26,
+    "name": "杨若楠",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "刘阳左路",
+    "position": "unknown"
+   },
+   {
+    "number": 97,
+    "name": "嘎玛顿珠",
+    "position": "unknown"
+   },
+   {
+    "number": 99,
+    "name": "美尔班",
+    "position": "unknown"
+   }
+  ],
+  "心理学院": [
+   {
+    "number": 6,
+    "name": "秦政",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "徐威",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "陶杰",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "张丞嗣",
+    "position": "unknown"
+   }
+  ],
+  "教育学部": [
+   {
+    "number": 1,
+    "name": "专注度",
+    "position": "门将"
+   },
+   {
+    "number": 5,
+    "name": "朱晓环",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "蒋思雨",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "叶德力",
+    "position": "unknown"
+   },
+   {
+    "number": 14,
+    "name": "Samson",
+    "position": "unknown"
+   },
+   {
+    "number": 16,
+    "name": "Irene",
+    "position": "unknown"
+   },
+   {
+    "number": 18,
+    "name": "Bab",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "高锦宝",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "Ismail Souissi",
+    "position": "unknown"
+   },
+   {
+    "number": 23,
+    "name": "刘嘉乐领",
+    "position": "unknown"
+   },
+   {
+    "number": 24,
+    "name": "Michael Wilbert Nicodemus",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "钱锋",
+    "position": "unknown"
+   },
+   {
+    "number": 90,
+    "name": "ELMER UCHE POUMBA",
+    "position": "unknown"
+   },
+   {
+    "number": 90,
+    "name": "ELMERUCHE POUMBA",
+    "position": "unknown"
+   },
+   {
+    "number": 96,
+    "name": "Faustin Modesto Mwalye go",
+    "position": "unknown"
+   },
+   {
+    "number": 96,
+    "name": "Faustin Modesto Mwalyego",
+    "position": "unknown"
+   }
+  ],
+  "数学与统计学院": [
+   {
+    "number": 7,
+    "name": "林晟溪",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "一个游龙位",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "曹峰睿",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "王诚然",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "卜俊",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "卞俊霸气",
+    "position": "unknown"
+   },
+   {
+    "number": 14,
+    "name": "黄虹皓",
+    "position": "unknown"
+   },
+   {
+    "number": 25,
+    "name": "宋元启",
+    "position": "unknown"
+   },
+   {
+    "number": 25,
+    "name": "宋远启一个",
+    "position": "unknown"
+   },
+   {
+    "number": 47,
+    "name": "曹戬",
+    "position": "unknown"
+   },
+   {
+    "number": 72,
+    "name": "高硕",
+    "position": "unknown"
+   }
+  ],
+  "文学院": [
+   {
+    "number": 1,
+    "name": "曹睿",
+    "position": "门将"
+   },
+   {
+    "number": 2,
+    "name": "赵博",
+    "position": "unknown"
+   },
+   {
+    "number": 3,
+    "name": "王恒",
+    "position": "unknown"
+   },
+   {
+    "number": 3,
+    "name": "胡刚莹",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "林森",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "Aripzhan",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "王小优",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "王靖云",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "尹鑫",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "长琛博",
+    "position": "unknown"
+   },
+   {
+    "number": 21,
+    "name": "号买",
+    "position": "unknown"
+   },
+   {
+    "number": 23,
+    "name": "陈亚唯",
+    "position": "unknown"
+   },
+   {
+    "number": 24,
+    "name": "吴雁南",
+    "position": "unknown"
+   },
+   {
+    "number": 24,
+    "name": "唐杰",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "杨皓",
+    "position": "unknown"
+   },
+   {
+    "number": 30,
+    "name": "催昱洲",
+    "position": "unknown"
+   },
+   {
+    "number": 30,
+    "name": "崔昱周",
+    "position": "unknown"
+   },
+   {
+    "number": 30,
+    "name": "崔昱洲右",
+    "position": "unknown"
+   },
+   {
+    "number": 32,
+    "name": "韩晨辉",
+    "position": "unknown"
+   },
+   {
+    "number": 77,
+    "name": "季明冉",
+    "position": "unknown"
+   }
+  ],
+  "新闻传媒学院": [
+   {
+    "number": 2,
+    "name": "李森再入",
+    "position": "unknown"
+   },
+   {
+    "number": 3,
+    "name": "赵俊涵",
+    "position": "unknown"
+   },
+   {
+    "number": 4,
+    "name": "高子潇",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "张瀚心",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "王子川",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "洪煌鑫",
+    "position": "unknown"
+   },
+   {
+    "number": 18,
+    "name": "丁晗",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "罗江松",
+    "position": "unknown"
+   },
+   {
+    "number": 21,
+    "name": "许斌",
+    "position": "unknown"
+   },
+   {
+    "number": 29,
+    "name": "王瑞峰",
+    "position": "unknown"
+   },
+   {
+    "number": 33,
+    "name": "陈浩华",
+    "position": "unknown"
+   },
+   {
+    "number": 39,
+    "name": "和畅",
+    "position": "unknown"
+   }
+  ],
+  "材料与能源学院": [
+   {
+    "number": 9,
+    "name": "孙嘉逸",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "桑杰才让",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "冯烨默契",
+    "position": "unknown"
+   },
+   {
+    "number": 47,
+    "name": "傅笳铭",
+    "position": "unknown"
+   },
+   {
+    "number": 66,
+    "name": "杨鑫瑞",
+    "position": "unknown"
+   }
+  ],
+  "植物保护学院": [
+   {
+    "number": 2,
+    "name": "周鹏宇",
+    "position": "unknown"
+   },
+   {
+    "number": 3,
+    "name": "赵睿",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "吴奇",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "球吴奇员",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "黄子豪",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "吴林骏",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "王杰露",
+    "position": "unknown"
+   },
+   {
+    "number": 57,
+    "name": "高彬豪",
+    "position": "unknown"
+   },
+   {
+    "number": 78,
+    "name": "戴良源",
+    "position": "unknown"
+   },
+   {
+    "number": 91,
+    "name": "胡浩然",
+    "position": "unknown"
+   }
+  ],
+  "水产学院": [
+   {
+    "number": 6,
+    "name": "蔡思俊一路",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "彭盛",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "赵铭",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "文涛因战术",
+    "position": "unknown"
+   },
+   {
+    "number": 16,
+    "name": "黄俊杰",
+    "position": "unknown"
+   },
+   {
+    "number": 18,
+    "name": "姚之岳",
+    "position": "unknown"
+   },
+   {
+    "number": 25,
+    "name": "戴旭东",
+    "position": "unknown"
+   }
+  ],
+  "法学院": [
+   {
+    "number": 8,
+    "name": "巴哈迪尔",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "王一丁",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "丁思壮",
+    "position": "unknown"
+   },
+   {
+    "number": 13,
+    "name": "泽仁旺堆",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "普光明",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "巴桑",
+    "position": "unknown"
+   },
+   {
+    "number": 28,
+    "name": "靳于晨",
+    "position": "unknown"
+   }
+  ],
+  "物理科学与技术学院": [
+   {
+    "number": 7,
+    "name": "李荻秋",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "李恒宇套边",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "岳鹏飞",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "姚浩然",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "苗元智",
+    "position": "unknown"
+   },
+   {
+    "number": 24,
+    "name": "肖洒",
+    "position": "unknown"
+   },
+   {
+    "number": 26,
+    "name": "何富兴",
+    "position": "unknown"
+   },
+   {
+    "number": 28,
+    "name": "郑好",
+    "position": "unknown"
+   },
+   {
+    "number": 30,
+    "name": "王川",
+    "position": "unknown"
+   },
+   {
+    "number": 32,
+    "name": "李秉鸿",
+    "position": "unknown"
+   },
+   {
+    "number": 37,
+    "name": "李道盛",
+    "position": "unknown"
+   },
+   {
+    "number": 66,
+    "name": "宁栋",
+    "position": "unknown"
+   }
+  ],
+  "生命科学学院": [
+   {
+    "number": 1,
+    "name": "阿不达衣·肉孜艾力",
+    "position": "unknown"
+   },
+   {
+    "number": 2,
+    "name": "李雨泽",
+    "position": "unknown"
+   },
+   {
+    "number": 3,
+    "name": "以及",
+    "position": "unknown"
+   },
+   {
+    "number": 3,
+    "name": "李佳玥",
+    "position": "unknown"
+   },
+   {
+    "number": 5,
+    "name": "赵天宇",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "彭宏宇",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "麦麦提依明",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "饶禹州",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "王文浩",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "王梁坤",
+    "position": "unknown"
+   },
+   {
+    "number": 30,
+    "name": "陈天",
+    "position": "unknown"
+   },
+   {
+    "number": 66,
+    "name": "白航",
+    "position": "unknown"
+   },
+   {
+    "number": 88,
+    "name": "许宁",
+    "position": "unknown"
+   },
+   {
+    "number": 94,
+    "name": "刘嘉乐脚",
+    "position": "unknown"
+   }
+  ],
+  "电子信息工程学院": [
+   {
+    "number": 2,
+    "name": "李森",
+    "position": "unknown"
+   },
+   {
+    "number": 3,
+    "name": "张耕瑞",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "何俊豪进行",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "邓韩英博",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "李煜",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "王羿潼",
+    "position": "unknown"
+   },
+   {
+    "number": 23,
+    "name": "蓝正子借",
+    "position": "unknown"
+   },
+   {
+    "number": 25,
+    "name": "王泽豪",
+    "position": "unknown"
+   },
+   {
+    "number": 44,
+    "name": "唐怡",
+    "position": "unknown"
+   },
+   {
+    "number": 93,
+    "name": "杨志",
+    "position": "unknown"
+   }
+  ],
+  "经济管理学院": [
+   {
+    "number": 11,
+    "name": "魏忠昀",
+    "position": "unknown"
+   },
+   {
+    "number": 26,
+    "name": "卢增迪",
+    "position": "unknown"
+   },
+   {
+    "number": 33,
+    "name": "刘涛",
+    "position": "unknown"
+   }
+  ],
+  "美术学院": [
+   {
+    "number": 3,
+    "name": "于亿龙",
+    "position": "unknown"
+   },
+   {
+    "number": 5,
+    "name": "汤城关键",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "伊力扎特右路尝试",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "石曲多杰",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "丁增群培",
+    "position": "unknown"
+   },
+   {
+    "number": 23,
+    "name": "蔡小丰",
+    "position": "unknown"
+   },
+   {
+    "number": 24,
+    "name": "关林翰",
+    "position": "unknown"
+   },
+   {
+    "number": 24,
+    "name": "吴林瀚",
+    "position": "unknown"
+   },
+   {
+    "number": 27,
+    "name": "孙洪润",
+    "position": "unknown"
+   },
+   {
+    "number": 32,
+    "name": "周昕宇",
+    "position": "unknown"
+   },
+   {
+    "number": 34,
+    "name": "吴世磊",
+    "position": "unknown"
+   },
+   {
+    "number": 37,
+    "name": "石俊宇",
+    "position": "unknown"
+   },
+   {
+    "number": 74,
+    "name": "刘嘉乐",
+    "position": "unknown"
+   },
+   {
+    "number": 79,
+    "name": "毛存伟",
+    "position": "unknown"
+   },
+   {
+    "number": 94,
+    "name": "刘嘉乐",
+    "position": "unknown"
+   }
+  ],
+  "蚕桑纺织与生物质科学学院": [
+   {
+    "number": 7,
+    "name": "姚雲耀",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "ELJABY NOUH",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "梅梓樨",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "张浩然",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "刘冠雄",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "陈歆凯",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "吕瀚文",
+    "position": "unknown"
+   },
+   {
+    "number": 14,
+    "name": "范雨萱",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "朱华楠",
+    "position": "后卫"
+   },
+   {
+    "number": 25,
+    "name": "纪林圣哲",
+    "position": "unknown"
+   },
+   {
+    "number": 33,
+    "name": "李新豪",
+    "position": "unknown"
+   },
+   {
+    "number": 41,
+    "name": "蒲昱宏",
+    "position": "unknown"
+   },
+   {
+    "number": 66,
+    "name": "王家国",
+    "position": "unknown"
+   },
+   {
+    "number": 88,
+    "name": "Jerry",
+    "position": "unknown"
+   }
+  ],
+  "西塔学院": [
+   {
+    "number": 7,
+    "name": "孙琦皓",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "孟庆宇",
+    "position": "unknown"
+   },
+   {
+    "number": 18,
+    "name": "龚天啸",
+    "position": "unknown"
+   },
+   {
+    "number": 23,
+    "name": "张科",
+    "position": "unknown"
+   },
+   {
+    "number": 24,
+    "name": "程韬",
+    "position": "unknown"
+   }
+  ],
+  "计算机与信息科学学院": [
+   {
+    "number": 1,
+    "name": "李明轩",
+    "position": "unknown"
+   },
+   {
+    "number": 3,
+    "name": "张皓宇",
+    "position": "后卫"
+   },
+   {
+    "number": 7,
+    "name": "阿合朱力",
+    "position": "unknown"
+   },
+   {
+    "number": 8,
+    "name": "孙心成",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "马旭麟",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "阿合朱力",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "颜炜燃",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "赵宇皓",
+    "position": "unknown"
+   },
+   {
+    "number": 13,
+    "name": "熊震宇",
+    "position": "unknown"
+   },
+   {
+    "number": 16,
+    "name": "许家乐",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "何建鑫",
+    "position": "unknown"
+   },
+   {
+    "number": 18,
+    "name": "周祺康",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "文锐",
+    "position": "unknown"
+   },
+   {
+    "number": 24,
+    "name": "张欣铭",
+    "position": "unknown"
+   },
+   {
+    "number": 30,
+    "name": "王骁南",
+    "position": "unknown"
+   },
+   {
+    "number": 31,
+    "name": "熊震宇",
+    "position": "unknown"
+   },
+   {
+    "number": 99,
+    "name": "刘甜羽",
+    "position": "unknown"
+   }
+  ],
+  "资源环境学院": [
+   {
+    "number": 2,
+    "name": "刘岳函",
+    "position": "unknown"
+   },
+   {
+    "number": 3,
+    "name": "张皓南",
+    "position": "unknown"
+   },
+   {
+    "number": 4,
+    "name": "普扎",
+    "position": "unknown"
+   },
+   {
+    "number": 5,
+    "name": "彭宇轩",
+    "position": "unknown"
+   },
+   {
+    "number": 6,
+    "name": "吾克特木",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "熊厚便",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "熊厚领球后",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "嘎玛索朗",
+    "position": "unknown"
+   },
+   {
+    "number": 11,
+    "name": "刘涛",
+    "position": "unknown"
+   },
+   {
+    "number": 12,
+    "name": "周航磊先一步",
+    "position": "unknown"
+   },
+   {
+    "number": 14,
+    "name": "格伦桑珠",
+    "position": "unknown"
+   },
+   {
+    "number": 14,
+    "name": "格桑伦珠",
+    "position": "unknown"
+   },
+   {
+    "number": 16,
+    "name": "刘东恒",
+    "position": "unknown"
+   },
+   {
+    "number": 17,
+    "name": "刘国隽",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "叶热",
+    "position": "unknown"
+   },
+   {
+    "number": 34,
+    "name": "姚莹贺",
+    "position": "unknown"
+   }
+  ],
+  "食品科学学院": [
+   {
+    "number": 4,
+    "name": "和云凯",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "彭靖博",
+    "position": "unknown"
+   },
+   {
+    "number": 9,
+    "name": "李元淳",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "艾力亚斯",
+    "position": "unknown"
+   },
+   {
+    "number": 21,
+    "name": "李博伦",
+    "position": "unknown"
+   }
+  ],
+  "马克思主义学院": [
+   {
+    "number": 3,
+    "name": "塔伊尔",
+    "position": "unknown"
+   },
+   {
+    "number": 7,
+    "name": "旦增赤列",
+    "position": "unknown"
+   },
+   {
+    "number": 10,
+    "name": "吕昱峰",
+    "position": "unknown"
+   },
+   {
+    "number": 13,
+    "name": "田英锐",
+    "position": "unknown"
+   },
+   {
+    "number": 19,
+    "name": "次旦加措",
+    "position": "unknown"
+   },
+   {
+    "number": 20,
+    "name": "谭汀镝",
+    "position": "unknown"
+   },
+   {
+    "number": 22,
+    "name": "胡竣铭",
+    "position": "unknown"
+   },
+   {
+    "number": 25,
+    "name": "阿思沙尔",
+    "position": "unknown"
+   },
+   {
+    "number": 26,
+    "name": "CHINCHERDWONG",
+    "position": "unknown"
+   },
+   {
+    "number": 29,
+    "name": "姚宇童",
+    "position": "unknown"
+   },
+   {
+    "number": 45,
+    "name": "于米提",
+    "position": "unknown"
+   },
+   {
+    "number": 88,
+    "name": "Nguyen Vu Nhat Nam",
+    "position": "unknown"
+   }
+  ]
+ }
+}
